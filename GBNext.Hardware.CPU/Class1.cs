@@ -171,14 +171,14 @@ namespace GBNext.Hardware.CPU
                 case 125: NotImplemented(125); break;
                 case 126: NotImplemented(126); break;
                 case 127: NotImplemented(127); break;
-                case 128: NotImplemented(128); break;
-                case 129: NotImplemented(129); break;
-                case 130: NotImplemented(130); break;
-                case 131: NotImplemented(131); break;
-                case 132: NotImplemented(132); break;
-                case 133: NotImplemented(133); break;
-                case 134: NotImplemented(134); break;
-                case 135: NotImplemented(135); break;
+                case 0x80: ADDRegisterToA(0x80,B); break;
+                case 0x81: ADDRegisterToA(0x81,C); break;
+                case 0x82: ADDRegisterToA(0x82,D); break;
+                case 0x83: ADDRegisterToA(0x83,E); break;
+                case 0x84: ADDRegisterToA(0x84,H); break;
+                case 0x85: ADDRegisterToA(0x85,L); break;
+                case 0x86: ADDRegisterToA(0x86,0); break;
+                case 0x87: ADDRegisterToA(0x87,A); break;
                 case 136: NotImplemented(136); break;
                 case 137: NotImplemented(137); break;
                 case 138: NotImplemented(138); break;
@@ -301,6 +301,27 @@ namespace GBNext.Hardware.CPU
             }
         }
 
+        
+        #region ALU
+
+        #region ADD
+        private void ADDRegisterToA(int opcode,byte registerValue)
+        {
+            UInt16 result = (UInt16)(A + registerValue);
+            A = (byte)result;
+            ADDComprobeFlags(result);
+        }
+        private void ADDComprobeFlags(UInt16 result)
+        {
+            FlagH = result > 0x0f;
+            FlagC = result > 0xff;
+            FlagZ = A == 0;
+            FlagN = false;
+        }
+
+        #endregion 
+
+        #endregion 
         private void LD_D_N()
         {
             D = memoryController.GetPosition(PC++);
