@@ -10,5 +10,7 @@ namespace GBNext.Hardware.Memory
     {
         byte GetPosition(UInt16 position);
         UInt16 GetPosition16(UInt16 position);
+
+        void Write(UInt16 position, byte data);
     }
 }
