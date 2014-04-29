@@ -57,7 +57,7 @@ namespace GBNext.Hardware.CPU
                 case 11: NotImplemented(11); break;
                 case 12: NotImplemented(12); break;
                 case 13: NotImplemented(13); break;
-                case 14: NotImplemented(14); break;
+                case 0x0E: LD_C_N(); break;
                 case 15: NotImplemented(15); break;
                 case 16: NotImplemented(16); break;
                 case 17: NotImplemented(17); break;
@@ -65,7 +65,7 @@ namespace GBNext.Hardware.CPU
                 case 19: NotImplemented(19); break;
                 case 20: NotImplemented(20); break;
                 case 21: NotImplemented(21); break;
-                case 22: NotImplemented(22); break;
+                case 0x16: LD_D_N(); break;
                 case 23: NotImplemented(23); break;
                 case 24: NotImplemented(24); break;
                 case 25: NotImplemented(25); break;
@@ -299,6 +299,16 @@ namespace GBNext.Hardware.CPU
                 case 253: NotImplemented(253); break;
                 case 254: NotImplemented(254); break;
             }
+        }
+
+        private void LD_D_N()
+        {
+            D = memoryController.GetPosition(PC++);
+        }
+
+        private void LD_C_N()
+        {
+            C = memoryController.GetPosition(PC++);
         }
 
         private void LD_B_N()
