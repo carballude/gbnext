@@ -121,12 +121,12 @@ namespace GBNext.Hardware.CPU
                 case 61: NotImplemented(61); break;
                 case 62: NotImplemented(62); break;
                 case 63: NotImplemented(63); break;
-                case 64: NotImplemented(64); break;
-                case 65: NotImplemented(65); break;
-                case 66: NotImplemented(66); break;
-                case 67: NotImplemented(67); break;
-                case 68: NotImplemented(68); break;
-                case 69: NotImplemented(69); break;
+                case 0x40: LD_B_B(); break;
+                case 0x41: LD_B_r(C); break;
+                case 0x42: LD_B_r(D); break;
+                case 0x43: LD_B_r(E); break;
+                case 0x44: LD_B_r(H); break;
+                case 0x45: LD_B_r(L); break;
                 case 70: NotImplemented(70); break;
                 case 71: NotImplemented(71); break;
                 case 72: NotImplemented(72); break;
@@ -327,9 +327,69 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(4);
         }
 
+        private void LD_C_r(byte register)
+        {
+            C = register;
+            ConsumeCycle(4);
+        }
+
+        private void LD_D_r(byte register)
+        {
+            D = register;
+            ConsumeCycle(4);
+        }
+
+        private void LD_H_r(byte register)
+        {
+            H = register;
+            ConsumeCycle(4);
+        }
+
+        private void LD_L_r(byte register)
+        {
+            L = register;
+            ConsumeCycle(4);
+        }
+
         private void LD_A_m()
         {
             A = memoryController.GetPosition((ushort)HL);
+            ConsumeCycle(8);
+        }
+
+        private void LD_B_m()
+        {
+            B = memoryController.GetPosition((ushort)HL);
+            ConsumeCycle(8);
+        }
+
+        private void LD_C_m()
+        {
+            C = memoryController.GetPosition((ushort)HL);
+            ConsumeCycle(8);
+        }
+
+        private void LD_D_m()
+        {
+            D = memoryController.GetPosition((ushort)HL);
+            ConsumeCycle(8);
+        }
+
+        private void LD_E_m()
+        {
+            E = memoryController.GetPosition((ushort)HL);
+            ConsumeCycle(8);
+        }
+
+        private void LD_H_m()
+        {
+            H = memoryController.GetPosition((ushort)HL);
+            ConsumeCycle(8);
+        }
+
+        private void LD_L_m()
+        {
+            L = memoryController.GetPosition((ushort)HL);
             ConsumeCycle(8);
         }
 
@@ -339,6 +399,31 @@ namespace GBNext.Hardware.CPU
         }
 
         private void LD_B_B()
+        {
+            ConsumeCycle(4);
+        }
+
+        private void LD_C_C()
+        {
+            ConsumeCycle(4);
+        }
+
+        private void LD_D_D()
+        {
+            ConsumeCycle(4);
+        }
+
+        private void LD_E_E()
+        {
+            ConsumeCycle(4);
+        }
+
+        private void LD_H_H()
+        {
+            ConsumeCycle(4);
+        }
+
+        private void LD_L_L()
         {
             ConsumeCycle(4);
         }
