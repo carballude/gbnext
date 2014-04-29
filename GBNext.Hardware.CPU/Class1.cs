@@ -185,14 +185,14 @@ namespace GBNext.Hardware.CPU
                 case 0x7D: LD_A_r(L); break;
                 case 0x7E: LD_A_m(); break;
                 case 0x7F: LD_A_A(); break;
-                case 128: NotImplemented(128); break;
-                case 129: NotImplemented(129); break;
-                case 130: NotImplemented(130); break;
-                case 131: NotImplemented(131); break;
-                case 132: NotImplemented(132); break;
-                case 133: NotImplemented(133); break;
-                case 134: NotImplemented(134); break;
-                case 135: NotImplemented(135); break;
+                case 0x80: ADDRegisterToA(0x80, B); break;
+                case 0x81: ADDRegisterToA(0x81, C); break;
+                case 0x82: ADDRegisterToA(0x82, D); break;
+                case 0x83: ADDRegisterToA(0x83, E); break;
+                case 0x84: ADDRegisterToA(0x84, H); break;
+                case 0x85: ADDRegisterToA(0x85, L); break;
+                case 0x86: ADDMemoryToA(0x86); break;
+                case 0x87: ADDRegisterToA(0x87, A); break;
                 case 136: NotImplemented(136); break;
                 case 137: NotImplemented(137); break;
                 case 138: NotImplemented(138); break;
@@ -255,7 +255,7 @@ namespace GBNext.Hardware.CPU
                 case 195: NotImplemented(195); break;
                 case 196: NotImplemented(196); break;
                 case 197: NotImplemented(197); break;
-                case 198: NotImplemented(198); break;
+                case 0xC6: ADDInmediateToA(0xC6); break;
                 case 199: NotImplemented(199); break;
                 case 200: NotImplemented(200); break;
                 case 201: NotImplemented(201); break;
@@ -472,6 +472,45 @@ namespace GBNext.Hardware.CPU
         #region Instructions
         private void noop() { }
         #endregion
+
+        #region ALU
+
+        #region ADD
+        private void ADDRegisterToA(int opcode, byte registerValue)
+        {
+            UInt16 result = (UInt16)(A + registerValue);
+            A = (byte)result;
+            ADDComprobeFlags(result);
+            ConsumeCycle(4);
+        }
+
+        private void ADDMemoryToA(int opcode)
+        {
+            UInt16 result = (UInt16)(A + memoryController.GetPosition((ushort)HL));
+            A = (byte)result;
+            ADDComprobeFlags(result);
+            ConsumeCycle(8);
+        }
+
+        private void ADDInmediateToA(int opcode)
+        {
+            UInt16 result = (UInt16)(A + memoryController.GetPosition(PC++));
+            A = (byte)result;
+            ADDComprobeFlags(result);
+            ConsumeCycle(8);
+        }
+
+        private void ADDComprobeFlags(UInt16 result)
+        {
+            FlagH = result > 0x0f;
+            FlagC = result > 0xff;
+            FlagZ = A == 0;
+            FlagN = false;
+        }
+
+        #endregion
+
+        #endregion 
 
         private void NotImplemented(int instruction)
         {
