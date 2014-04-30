@@ -28,12 +28,12 @@ namespace GBNext.Hardware.CPU
         UInt16 PC;
         bool FlagZ, FlagN, FlagH, FlagC;
         bool[] lowerFlags = new bool[4];
-        Int16 AF
+        UInt16 AF
         {
             get
             {
-                Int16 af = registers[A];
-                af = (Int16)((af << 8) | registers[F]);
+                UInt16 af = registers[A];
+                af = (UInt16)((af << 8) | registers[F]);
                 return af;
             }
             set
@@ -43,12 +43,12 @@ namespace GBNext.Hardware.CPU
             }
         }
 
-        Int16 BC
+        UInt16 BC
         {
             get
             {
-                Int16 bc = registers[B];
-                bc = (Int16)((bc << 8) | registers[C]);
+                UInt16 bc = registers[B];
+                bc = (UInt16)((bc << 8) | registers[C]);
                 return bc;
             }
             set
@@ -58,12 +58,12 @@ namespace GBNext.Hardware.CPU
             }
         }
 
-        Int16 DE
+        UInt16 DE
         {
             get
             {
-                Int16 de = registers[D];
-                de = (Int16)((de << 8) | registers[E]);
+                UInt16 de = registers[D];
+                de = (UInt16)((de << 8) | registers[E]);
                 return de;
             }
             set
@@ -73,12 +73,12 @@ namespace GBNext.Hardware.CPU
             }
         }
 
-        Int16 HL
+        UInt16 HL
         {
             get
             {
-                Int16 hl = registers[H];
-                return (Int16)((hl << 8) | L);
+                UInt16 hl = registers[H];
+                return (UInt16)((hl << 8) | L);
             }
             set
             {
@@ -99,7 +99,7 @@ namespace GBNext.Hardware.CPU
             switch (currentInstruction)
             {
                 case 0: noop(); break;
-                case 1: NotImplemented(1); break;
+                case 0x01: LD_rr_nn(BC); break;
                 case 0x02: LD_rm_r(BC,A); break;
                 case 3: NotImplemented(3); break;
                 case 4: NotImplemented(4); break;
@@ -115,7 +115,7 @@ namespace GBNext.Hardware.CPU
                 case 0x0E: LD_r_n(C); break;
                 case 15: NotImplemented(15); break;
                 case 16: NotImplemented(16); break;
-                case 17: NotImplemented(17); break;
+                case 0x11: LD_rr_nn(DE); break;
                 case 0x12: LD_rm_r(DE,A); break;
                 case 19: NotImplemented(19); break;
                 case 20: NotImplemented(20); break;
@@ -131,7 +131,7 @@ namespace GBNext.Hardware.CPU
                 case 0x1E: LD_r_n(E); break;
                 case 31: NotImplemented(31); break;
                 case 32: NotImplemented(32); break;
-                case 33: NotImplemented(33); break;
+                case 0x21: LD_rr_nn(HL); break;
                 case 34: NotImplemented(34); break;
                 case 35: NotImplemented(35); break;
                 case 36: NotImplemented(36); break;
@@ -147,7 +147,7 @@ namespace GBNext.Hardware.CPU
                 case 0x2E: LD_r_n(L); break;
                 case 47: NotImplemented(47); break;
                 case 48: NotImplemented(48); break;
-                case 49: NotImplemented(49); break;
+                case 0x31: LD_rr_nn(SP); break;
                 case 50: LDD_mHL_r(A); break;
                 case 51: NotImplemented(51); break;
                 case 52: NotImplemented(52); break;
@@ -322,7 +322,7 @@ namespace GBNext.Hardware.CPU
                 case 221: NotImplemented(221); break;
                 case 222: NotImplemented(222); break;
                 case 223: NotImplemented(223); break;
-                case 224: NotImplemented(224); break;
+                case 0xE0: LD_ffnn_r(A); break;
                 case 225: NotImplemented(225); break;
                 case 0xE2: LD_ffrm_r(C, A); break;
                 case 227: NotImplemented(227); break;
@@ -338,7 +338,7 @@ namespace GBNext.Hardware.CPU
                 case 237: NotImplemented(237); break;
                 case 238: NotImplemented(238); break;
                 case 239: NotImplemented(239); break;
-                case 240: NotImplemented(240); break;
+                case 0xF0: LD_r_ffnn(A); break;
                 case 241: NotImplemented(241); break;
                 case 0xF2: LD_r_ffrm(A,C); break;
                 case 243: NotImplemented(243); break;
@@ -347,13 +347,31 @@ namespace GBNext.Hardware.CPU
                 case 246: NotImplemented(246); break;
                 case 247: NotImplemented(247); break;
                 case 248: NotImplemented(248); break;
-                case 249: NotImplemented(249); break;
+                case 0xF9: LD_rr_rr(SP,HL); break;
                 case 0xFA: LD_r_nn(A); break;
                 case 251: NotImplemented(251); break;
                 case 252: NotImplemented(252); break;
                 case 253: NotImplemented(253); break;
                 case 254: NotImplemented(254); break;
             }
+        }
+
+        #region 8-BIT INSTRUCTIONS
+
+        private void LD_r_ffnn(int register)
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            registers[register] = memoryController.GetPosition((ushort)(0xFF00 + (ushort)((hi << 8) | lo)));
+            ConsumeCycle(12);
+        }
+
+        private void LD_ffnn_r(int register)
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            memoryController.Write(memoryController.GetPosition((ushort)(0xFF00 + (ushort)((hi << 8) | lo))), registers[register]);
+            ConsumeCycle(12);
         }
 
         private void LDD_mHL_r(int register)
@@ -370,9 +388,9 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(8);
         }
 
-        private void LD_rm_r(Int16 registerMemory, int register)
+        private void LD_rm_r(UInt16 registerMemory, int register)
         {
-            memoryController.Write((ushort)registerMemory, registers[register]);
+            memoryController.Write(registerMemory, registers[register]);
             ConsumeCycle(8);
         }
 
@@ -382,9 +400,9 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(4);
         }
 
-        private void LD_r_rm(int register, Int16 registryMemory)
+        private void LD_r_rm(int register, UInt16 registryMemory)
         {
-            registers[register] = memoryController.GetPosition((ushort)registryMemory);
+            registers[register] = memoryController.GetPosition(registryMemory);
             ConsumeCycle(8);
         }
 
@@ -430,7 +448,7 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(8);
         }
 
-        private void LD_mr_n(Int16 register)
+        private void LD_mr_n(UInt16 register)
         {
             memoryController.Write(memoryController.GetPosition(registers[register]), memoryController.GetPosition(PC++));
             ConsumeCycle(12);
@@ -441,8 +459,26 @@ namespace GBNext.Hardware.CPU
             throw new NotImplementedException();
         }
 
-        #region Instructions
         private void noop() { }
+
+        #endregion
+
+        #region 16-BIT INSTRUCTIONS
+
+        private void LD_rr_nn(UInt16 registry)
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            registry = (ushort)((hi << 8) | lo);
+            ConsumeCycle(12);
+        }
+
+        private void LD_rr_rr(UInt16 to, UInt16 from)
+        {
+            to = from;
+            ConsumeCycle(8);
+        }
+
         #endregion
 
         #region ALU
