@@ -266,14 +266,14 @@ namespace GBNext.Hardware.CPU
                 case 0xA5: AND_r(L); break;
                 case 0xA6: AND_rm(HL); break;
                 case 0xA7: AND_r(A); break;
-                case 168: NotImplemented(168); break;
-                case 169: NotImplemented(169); break;
-                case 170: NotImplemented(170); break;
-                case 171: NotImplemented(171); break;
-                case 172: NotImplemented(172); break;
-                case 173: NotImplemented(173); break;
-                case 174: NotImplemented(174); break;
-                case 175: NotImplemented(175); break;
+                case 168: XOR_r(B); break;
+                case 169: XOR_r(C); break;
+                case 170: XOR_r(D); break;
+                case 171: XOR_r(E); break;
+                case 172: XOR_r(H); break;
+                case 173: XOR_r(L); break;
+                case 174: XOR_rm(HL); break;
+                case 175: XOR_r(A); break;
                 case 0xB0: OR_r(B); break;
                 case 0xB1: OR_r(C); break;
                 case 0xB2: OR_r(D); break;
@@ -336,7 +336,7 @@ namespace GBNext.Hardware.CPU
                 case 235: NotImplemented(235); break;
                 case 236: NotImplemented(236); break;
                 case 237: NotImplemented(237); break;
-                case 238: NotImplemented(238); break;
+                case 0xEE: XOR_n(); break;
                 case 239: NotImplemented(239); break;
                 case 0xF0: LD_r_ffnn(A); break;
                 case 241: NotImplemented(241); break;
@@ -738,6 +738,29 @@ namespace GBNext.Hardware.CPU
         {
             FlagZ = (registers[A] |= memoryController.GetPosition(PC++)) == 0;
             FlagN = FlagC = FlagH = false;
+            ConsumeCycle(8);
+        }
+        #endregion
+
+        #region XOR
+        private void XOR_r(int register)
+        {
+            FlagN = FlagH = FlagC = false;
+            FlagZ = (registers[A] ^= registers[register]) == 0;
+            ConsumeCycle(4);
+        }
+
+        private void XOR_rm(UInt16 registerMemory)
+        {
+            FlagN = FlagH = FlagC = false;
+            FlagZ = (registers[A] ^= memoryController.GetPosition(registerMemory)) == 0;
+            ConsumeCycle(8);
+        }
+
+        private void XOR_n()
+        {
+            FlagN = FlagH = FlagC = false;
+            FlagZ = (registers[A] ^= memoryController.GetPosition(PC++)) == 0;
             ConsumeCycle(8);
         }
         #endregion
