@@ -282,14 +282,14 @@ namespace GBNext.Hardware.CPU
                 case 0xB5: OR_r(L); break;
                 case 0xB6: OR_rm(HL); break;
                 case 0xB7: OR_r(A); break;
-                case 184: NotImplemented(184); break;
-                case 185: NotImplemented(185); break;
-                case 186: NotImplemented(186); break;
-                case 187: NotImplemented(187); break;
-                case 188: NotImplemented(188); break;
-                case 189: NotImplemented(189); break;
-                case 190: NotImplemented(190); break;
-                case 191: NotImplemented(191); break;
+                case 0xB8: CP_r(B); break;
+                case 0xB9: CP_r(C); break;
+                case 0xBA: CP_r(D); break;
+                case 0xBB: CP_r(E); break;
+                case 0xBC: CP_r(H); break;
+                case 0xBD: CP_r(L); break;
+                case 0xBE: CP_rm(HL); break;
+                case 0xBF: CP_r(A); break;
                 case 192: NotImplemented(192); break;
                 case 193: NotImplemented(193); break;
                 case 194: NotImplemented(194); break;
@@ -352,7 +352,7 @@ namespace GBNext.Hardware.CPU
                 case 251: NotImplemented(251); break;
                 case 252: NotImplemented(252); break;
                 case 253: NotImplemented(253); break;
-                case 254: NotImplemented(254); break;
+                case 0xFE: CP_n(); break;
             }
         }
 
@@ -764,6 +764,41 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(8);
         }
         #endregion
+
+        #region CP
+
+        private void CP_r(int register)
+        {
+            UInt16 operation = (UInt16)(registers[A] - registers[register]);
+            FlagZ = operation == 0;
+            FlagN = true;
+            FlagH = (registers[A] & 0x0F) - (registers[register] & 0x0F) > 0x0F;
+            FlagC = operation < 0 ? true : false;
+            ConsumeCycle(4);
+        }
+
+        private void CP_rm(UInt16 registerMemory)
+        {
+            var x = memoryController.GetPosition(registerMemory);
+            UInt16 operation = (UInt16)(registers[A] - x);
+            FlagZ = operation == 0;
+            FlagN = true;
+            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
+            FlagC = operation < 0 ? true : false;
+            ConsumeCycle(8);
+        }
+
+        private void CP_n()
+        {
+            var x = memoryController.GetPosition(PC++);
+            UInt16 operation = (UInt16)(registers[A] - x);
+            FlagZ = operation == 0;
+            FlagN = true;
+            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
+            FlagC = operation < 0 ? true : false;
+            ConsumeCycle(8);
+        }
+        #endregion  
 
         #endregion
 
