@@ -234,14 +234,14 @@ namespace GBNext.Hardware.CPU
                 case 0x85: ADDRegisterToA(0x85, L); break;
                 case 0x86: ADDMemoryToA(0x86); break;
                 case 0x87: ADDRegisterToA(0x87, A); break;
-                case 136: NotImplemented(136); break;
-                case 137: NotImplemented(137); break;
-                case 138: NotImplemented(138); break;
-                case 139: NotImplemented(139); break;
-                case 140: NotImplemented(140); break;
-                case 141: NotImplemented(141); break;
-                case 142: NotImplemented(142); break;
-                case 143: NotImplemented(143); break;
+                case 0x88: ADDCarryRegisterToA(0x88, B); break;
+                case 0x89: ADDCarryRegisterToA(0x89, C); break;
+                case 0x8A: ADDCarryRegisterToA(0x8A, D); break;
+                case 0x8B: ADDCarryRegisterToA(0x8B, E); break;
+                case 0x8C: ADDCarryRegisterToA(0x8C, H); break;
+                case 0x8D: ADDCarryRegisterToA(0x8D, L); break;
+                case 0x8E: ADDCarryMemoryToA(0x8E); break;
+                case 0x8F: ADDCarryRegisterToA(0x8F, A); break;
                 case 144: NotImplemented(144); break;
                 case 145: NotImplemented(145); break;
                 case 146: NotImplemented(146); break;
@@ -304,7 +304,7 @@ namespace GBNext.Hardware.CPU
                 case 203: NotImplemented(203); break;
                 case 204: NotImplemented(204); break;
                 case 205: NotImplemented(205); break;
-                case 206: NotImplemented(206); break;
+                case 0xCE: ADDCarryInmediateToA(0xCE); break;
                 case 207: NotImplemented(207); break;
                 case 208: NotImplemented(208); break;
                 case 209: NotImplemented(209); break;
@@ -355,6 +355,8 @@ namespace GBNext.Hardware.CPU
                 case 254: NotImplemented(254); break;
             }
         }
+
+
 
         #region 8-BIT INSTRUCTIONS
 
@@ -492,9 +494,34 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(4);
         }
 
+        private void ADDCarryRegisterToA(int opcode, byte registerValue)
+        {
+            if (!FlagC)
+            {
+                ADDRegisterToA(opcode - 0x08, registerValue);
+            }
+            UInt16 result = (UInt16)(registers[A] + registerValue + Convert.ToByte(FlagC));
+            registers[A] = (byte)result;
+            ADDComprobeFlags(result);
+            ConsumeCycle(4);
+
+        }
+
         private void ADDMemoryToA(int opcode)
         {
             UInt16 result = (UInt16)(registers[A] + memoryController.GetPosition((ushort)HL));
+            registers[A] = (byte)result;
+            ADDComprobeFlags(result);
+            ConsumeCycle(8);
+        }
+
+        private void ADDCarryMemoryToA(int opcode)
+        {
+            if (!FlagC)
+            {
+                ADDMemoryToA(opcode - 0x08);
+            }
+            UInt16 result = (UInt16)(registers[A] + memoryController.GetPosition((ushort)HL) + Convert.ToByte(FlagC));
             registers[A] = (byte)result;
             ADDComprobeFlags(result);
             ConsumeCycle(8);
@@ -508,6 +535,18 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(8);
         }
 
+        private void ADDCarryInmediateToA(int opcode)
+        {
+            if (!FlagC)
+            {
+                ADDInmediateToA(opcode - 0x08);
+            }
+            UInt16 result = (UInt16)(registers[A] + memoryController.GetPosition(PC++) + Convert.ToByte(FlagC));
+            registers[A] = (byte)result;
+            ADDComprobeFlags(result);
+            ConsumeCycle(8);
+        }
+
         private void ADDComprobeFlags(UInt16 result)
         {
             FlagH = result > 0x0f;
@@ -515,6 +554,7 @@ namespace GBNext.Hardware.CPU
             FlagZ = registers[A] == 0;
             FlagN = false;
         }
+
 
         #endregion
 
