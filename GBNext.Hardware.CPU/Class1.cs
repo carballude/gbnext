@@ -274,14 +274,14 @@ namespace GBNext.Hardware.CPU
                 case 173: NotImplemented(173); break;
                 case 174: NotImplemented(174); break;
                 case 175: NotImplemented(175); break;
-                case 176: NotImplemented(176); break;
-                case 177: NotImplemented(177); break;
-                case 178: NotImplemented(178); break;
-                case 179: NotImplemented(179); break;
-                case 180: NotImplemented(180); break;
-                case 181: NotImplemented(181); break;
-                case 182: NotImplemented(182); break;
-                case 183: NotImplemented(183); break;
+                case 0xB0: OR_r(B); break;
+                case 0xB1: OR_r(C); break;
+                case 0xB2: OR_r(D); break;
+                case 0xB3: OR_r(E); break;
+                case 0xB4: OR_r(H); break;
+                case 0xB5: OR_r(L); break;
+                case 0xB6: OR_rm(HL); break;
+                case 0xB7: OR_r(A); break;
                 case 184: NotImplemented(184); break;
                 case 185: NotImplemented(185); break;
                 case 186: NotImplemented(186); break;
@@ -344,7 +344,7 @@ namespace GBNext.Hardware.CPU
                 case 243: NotImplemented(243); break;
                 case 244: NotImplemented(244); break;
                 case 245: NotImplemented(245); break;
-                case 246: NotImplemented(246); break;
+                case 0xF6: OR_n(); break;
                 case 247: NotImplemented(247); break;
                 case 0xF8: LDHL_SP_n(); break;
                 case 0xF9: LD_rr_rr(SP,HL); break;
@@ -715,6 +715,29 @@ namespace GBNext.Hardware.CPU
             registers[A] = (byte)operation;
             FlagH = !(FlagC = FlagN = false);
             FlagZ = registers[A] == 0;
+            ConsumeCycle(8);
+        }
+        #endregion
+
+        #region OR
+        private void OR_r(int register)
+        {
+            FlagZ = (registers[A] |= registers[register]) == 0;
+            FlagN = FlagC = FlagH = false;
+            ConsumeCycle(4);
+        }
+
+        private void OR_rm(UInt16 registerMemory)
+        {
+            FlagZ = (registers[A] |= memoryController.GetPosition(registerMemory)) == 0;
+            FlagN = FlagC = FlagH = false;
+            ConsumeCycle(8);
+        }
+
+        private void OR_n()
+        {
+            FlagZ = (registers[A] |= memoryController.GetPosition(PC++)) == 0;
+            FlagN = FlagC = FlagH = false;
             ConsumeCycle(8);
         }
         #endregion
