@@ -242,14 +242,14 @@ namespace GBNext.Hardware.CPU
                 case 0x8D: ADDCarryRegisterToA(0x8D, L); break;
                 case 0x8E: ADDCarryMemoryToA(0x8E); break;
                 case 0x8F: ADDCarryRegisterToA(0x8F, A); break;
-                case 144: NotImplemented(144); break;
-                case 145: NotImplemented(145); break;
-                case 146: NotImplemented(146); break;
-                case 147: NotImplemented(147); break;
-                case 148: NotImplemented(148); break;
-                case 149: NotImplemented(149); break;
-                case 150: NotImplemented(150); break;
-                case 151: NotImplemented(151); break;
+                case 0x90: SUB_r(B); break;
+                case 0x91: SUB_r(C); break;
+                case 0x92: SUB_r(D); break;
+                case 0x93: SUB_r(E); break;
+                case 0x94: SUB_r(H); break;
+                case 0x95: SUB_r(L); break;
+                case 0x96: SUB_rm(HL); break;
+                case 0x97: SUB_r(A); break;
                 case 152: NotImplemented(152); break;
                 case 153: NotImplemented(153); break;
                 case 154: NotImplemented(154); break;
@@ -312,7 +312,7 @@ namespace GBNext.Hardware.CPU
                 case 211: NotImplemented(211); break;
                 case 212: NotImplemented(212); break;
                 case 213: NotImplemented(213); break;
-                case 214: NotImplemented(214); break;
+                case 0xD6: SUB_nn(); break;
                 case 215: NotImplemented(215); break;
                 case 216: NotImplemented(216); break;
                 case 217: NotImplemented(217); break;
@@ -555,6 +555,41 @@ namespace GBNext.Hardware.CPU
         #endregion
 
         #region ALU
+
+        #region SUB
+        private void SUB_r(int register)
+        {
+            FlagH = (registers[A] & 0x0F) - (registers[register] & 0x0F) > 0x0F;
+            registers[A] -= registers[register];            
+            FlagC = registers[A] > 0xFF;
+            FlagZ = registers[A] == 0;
+            FlagN = true;
+            ConsumeCycle(4);
+        }
+
+        private void SUB_rm(UInt16 registerMemory)
+        {
+            var x = memoryController.GetPosition(registerMemory);
+            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
+            registers[A] -= x;
+            FlagC = registers[A] > 0xFF;
+            FlagZ = registers[A] == 0;
+            FlagN = true;
+            ConsumeCycle(8);
+        }
+
+        private void SUB_nn()
+        {
+            var x = memoryController.GetPosition(PC++);
+            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
+            registers[A] -= x;
+            FlagC = registers[A] > 0xFF;
+            FlagZ = registers[A] == 0;
+            FlagN = true;
+            ConsumeCycle(8);
+        }
+
+        #endregion
 
         #region ADD
         private void ADDRegisterToA(int opcode, byte registerValue)
