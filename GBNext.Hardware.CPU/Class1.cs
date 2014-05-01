@@ -26,7 +26,7 @@ namespace GBNext.Hardware.CPU
         byte[] registers = new byte[8];
         UInt16 SP;
         UInt16 PC;
-        bool FlagZ, FlagN, FlagH, FlagC;
+        bool FlagZ, FlagN, FlagH, FlagC, FlagInterrupt;
         bool[] lowerFlags = new bool[4];
         UInt16 AF
         {
@@ -153,15 +153,15 @@ namespace GBNext.Hardware.CPU
                 case 0x34: INC_rm(HL); break;
                 case 0x35: DEC_rm(HL); break;
                 case 0x36: LD_rm_n(HL); break;
-                case 55: NotImplemented(55); break;
+                case 0x37: SCF(); break;
                 case 56: NotImplemented(56); break;
                 case 57: NotImplemented(57); break;
                 case 0x3A: LDD_r_rm(A, HL); break;
                 case 59: NotImplemented(59); break;
                 case 0x3C: INC_r(A); break;
                 case 0x3D: DEC_r(A); break;
-                case 62: LD_r_n(A); break;
-                case 63: NotImplemented(63); break;
+                case 0x3E: LD_r_n(A); break;
+                case 0X3F: CCF(); break;
                 case 0x40: LD_X_X(); break;
                 case 0x41: LD_r_r(B, C); break;
                 case 0x42: LD_r_r(B, D); break;
@@ -216,7 +216,7 @@ namespace GBNext.Hardware.CPU
                 case 0x73: LD_rm_r(HL, E); break;
                 case 0x74: LD_rm_r(HL, H); break;
                 case 0x75: LD_rm_r(HL, L); break;
-                case 118: NotImplemented(118); break;
+                case 0x76: HALT(); break;
                 case 0x77: LD_rm_r(HL,A); break;
                 case 0x78: LD_r_r(A, B); break;
                 case 0x79: LD_r_r(A, C); break;
@@ -341,7 +341,7 @@ namespace GBNext.Hardware.CPU
                 case 0xF0: LD_r_ffnn(A); break;
                 case 241: NotImplemented(241); break;
                 case 0xF2: LD_r_ffrm(A,C); break;
-                case 243: NotImplemented(243); break;
+                case 0xF3: DI(); break;
                 case 244: NotImplemented(244); break;
                 case 245: NotImplemented(245); break;
                 case 0xF6: OR_n(); break;
@@ -349,7 +349,7 @@ namespace GBNext.Hardware.CPU
                 case 0xF8: LDHL_SP_n(); break;
                 case 0xF9: LD_rr_rr(SP,HL); break;
                 case 0xFA: LD_r_nn(A); break;
-                case 251: NotImplemented(251); break;
+                case 0xFB: EI(); break;
                 case 252: NotImplemented(252); break;
                 case 253: NotImplemented(253); break;
                 case 0xFE: CP_n(); break;
@@ -799,6 +799,40 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(8);
         }
         #endregion  
+
+        #endregion
+
+
+        #region MISCELLANEOUS
+
+        private void CCF()
+        {
+            FlagC = ! FlagC;
+            FlagN = false;
+            FlagH = false;
+        }
+
+        private void SCF()
+        {
+            FlagC = true;
+            FlagN = false;
+            FlagH = false;
+        }
+
+        private void HALT()
+        {
+            NotImplemented(0x76); 
+        }
+
+        private void DI()
+        {
+            FlagInterrupt = false;
+        }
+
+        private void EI()
+        {
+            FlagInterrupt = true;
+        }
 
         #endregion
 
