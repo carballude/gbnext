@@ -226,22 +226,22 @@ namespace GBNext.Hardware.CPU
                 case 0x7D: LD_r_r(A, L); break;
                 case 0x7E: LD_r_rm(A,HL); break;
                 case 0x7F: LD_X_X(); break;
-                case 0x80: ADDRegisterToA(0x80, B); break;
-                case 0x81: ADDRegisterToA(0x81, C); break;
-                case 0x82: ADDRegisterToA(0x82, D); break;
-                case 0x83: ADDRegisterToA(0x83, E); break;
-                case 0x84: ADDRegisterToA(0x84, H); break;
-                case 0x85: ADDRegisterToA(0x85, L); break;
-                case 0x86: ADDMemoryToA(0x86); break;
-                case 0x87: ADDRegisterToA(0x87, A); break;
-                case 0x88: ADDCarryRegisterToA(0x88, B); break;
-                case 0x89: ADDCarryRegisterToA(0x89, C); break;
-                case 0x8A: ADDCarryRegisterToA(0x8A, D); break;
-                case 0x8B: ADDCarryRegisterToA(0x8B, E); break;
-                case 0x8C: ADDCarryRegisterToA(0x8C, H); break;
-                case 0x8D: ADDCarryRegisterToA(0x8D, L); break;
-                case 0x8E: ADDCarryMemoryToA(0x8E); break;
-                case 0x8F: ADDCarryRegisterToA(0x8F, A); break;
+                case 0x80: ADD_r(B); break;
+                case 0x81: ADD_r(C); break;
+                case 0x82: ADD_r(D); break;
+                case 0x83: ADD_r(E); break;
+                case 0x84: ADD_r(H); break;
+                case 0x85: ADD_r(L); break;
+                case 0x86: ADD_rm(HL); break;
+                case 0x87: ADD_r(A); break;
+                case 0x88: ADC_r(B); break;
+                case 0x89: ADC_r(C); break;
+                case 0x8A: ADC_r(D); break;
+                case 0x8B: ADC_r(E); break;
+                case 0x8C: ADC_r(H); break;
+                case 0x8D: ADC_r(L); break;
+                case 0x8E: ADC_rm(HL); break;
+                case 0x8F: ADC_r(A); break;
                 case 0x90: SUB_r(B); break;
                 case 0x91: SUB_r(C); break;
                 case 0x92: SUB_r(D); break;
@@ -258,14 +258,14 @@ namespace GBNext.Hardware.CPU
                 case 0x9D: SBC_r(L); break;
                 case 0x9E: SBC_rm(HL); break;
                 case 0x9F: SBC_r(A); break;
-                case 160: NotImplemented(160); break;
-                case 161: NotImplemented(161); break;
-                case 162: NotImplemented(162); break;
-                case 163: NotImplemented(163); break;
-                case 164: NotImplemented(164); break;
-                case 165: NotImplemented(165); break;
-                case 166: NotImplemented(166); break;
-                case 167: NotImplemented(167); break;
+                case 0xA0: AND_r(B); break;
+                case 0xA1: AND_r(C); break;
+                case 0xA2: AND_r(D); break;
+                case 0xA3: AND_r(E); break;
+                case 0xA4: AND_r(H); break;
+                case 0xA5: AND_r(L); break;
+                case 0xA6: AND_rm(HL); break;
+                case 0xA7: AND_r(A); break;
                 case 168: NotImplemented(168); break;
                 case 169: NotImplemented(169); break;
                 case 170: NotImplemented(170); break;
@@ -296,7 +296,7 @@ namespace GBNext.Hardware.CPU
                 case 195: NotImplemented(195); break;
                 case 196: NotImplemented(196); break;
                 case 197: NotImplemented(197); break;
-                case 0xC6: ADDInmediateToA(0xC6); break;
+                case 0xC6: ADD_n(); break;
                 case 199: NotImplemented(199); break;
                 case 200: NotImplemented(200); break;
                 case 201: NotImplemented(201); break;
@@ -304,7 +304,7 @@ namespace GBNext.Hardware.CPU
                 case 203: NotImplemented(203); break;
                 case 204: NotImplemented(204); break;
                 case 205: NotImplemented(205); break;
-                case 0xCE: ADDCarryInmediateToA(0xCE); break;
+                case 0xCE: ADC_n(); break;
                 case 207: NotImplemented(207); break;
                 case 208: NotImplemented(208); break;
                 case 209: NotImplemented(209); break;
@@ -328,7 +328,7 @@ namespace GBNext.Hardware.CPU
                 case 227: NotImplemented(227); break;
                 case 228: NotImplemented(228); break;
                 case 229: NotImplemented(229); break;
-                case 230: NotImplemented(230); break;
+                case 0xE6: AND_n(); break;
                 case 231: NotImplemented(231); break;
                 case 232: NotImplemented(232); break;
                 case 233: NotImplemented(233); break;
@@ -617,76 +617,106 @@ namespace GBNext.Hardware.CPU
         #endregion
 
         #region ADD
-        private void ADDRegisterToA(int opcode, byte registerValue)
-        {
-            UInt16 result = (UInt16)(registers[A] + registerValue);
-            registers[A] = (byte)result;
-            ADDComprobeFlags(result);
-            ConsumeCycle(4);
-        }
 
-        private void ADDCarryRegisterToA(int opcode, byte registerValue)
+        private void ADD_r(int register)
         {
-            if (!FlagC)
-            {
-                ADDRegisterToA(opcode - 0x08, registerValue);
-            }
-            UInt16 result = (UInt16)(registers[A] + registerValue + Convert.ToByte(FlagC));
-            registers[A] = (byte)result;
-            ADDComprobeFlags(result);
-            ConsumeCycle(4);
-
-        }
-
-        private void ADDMemoryToA(int opcode)
-        {
-            UInt16 result = (UInt16)(registers[A] + memoryController.GetPosition((ushort)HL));
-            registers[A] = (byte)result;
-            ADDComprobeFlags(result);
-            ConsumeCycle(8);
-        }
-
-        private void ADDCarryMemoryToA(int opcode)
-        {
-            if (!FlagC)
-            {
-                ADDMemoryToA(opcode - 0x08);
-            }
-            UInt16 result = (UInt16)(registers[A] + memoryController.GetPosition((ushort)HL) + Convert.ToByte(FlagC));
-            registers[A] = (byte)result;
-            ADDComprobeFlags(result);
-            ConsumeCycle(8);
-        }
-
-        private void ADDInmediateToA(int opcode)
-        {
-            UInt16 result = (UInt16)(registers[A] + memoryController.GetPosition(PC++));
-            registers[A] = (byte)result;
-            ADDComprobeFlags(result);
-            ConsumeCycle(8);
-        }
-
-        private void ADDCarryInmediateToA(int opcode)
-        {
-            if (!FlagC)
-            {
-                ADDInmediateToA(opcode - 0x08);
-            }
-            UInt16 result = (UInt16)(registers[A] + memoryController.GetPosition(PC++) + Convert.ToByte(FlagC));
-            registers[A] = (byte)result;
-            ADDComprobeFlags(result);
-            ConsumeCycle(8);
-        }
-
-        private void ADDComprobeFlags(UInt16 result)
-        {
-            FlagH = result > 0x0f;
-            FlagC = result > 0xff;
+            UInt16 operation = (UInt16)(registers[A] + registers[register]);
+            registers[A] = (byte)operation;
             FlagZ = registers[A] == 0;
             FlagN = false;
+            FlagH = operation > 0x0f;
+            FlagC = registers[A] > 0xff;
+            ConsumeCycle(4);
         }
 
+        private void ADD_rm(UInt16 registerMemory)
+        {
+            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(registerMemory));
+            registers[A] = (byte)operation;
+            FlagZ = registers[A] == 0;
+            FlagN = false;
+            FlagH = operation > 0x0f;
+            FlagC = registers[A] > 0xff;
+            ConsumeCycle(8);
+        }
 
+        private void ADD_n()
+        {
+            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(PC++));
+            registers[A] = (byte)operation;
+            FlagZ = registers[A] == 0;
+            FlagN = false;
+            FlagH = operation > 0x0f;
+            FlagC = registers[A] > 0xff;
+            ConsumeCycle(8);
+        }
+
+        #endregion
+
+        #region ADC
+
+        private void ADC_r(int register)
+        {
+            UInt16 operation = (UInt16)(registers[A] + registers[register] + (FlagC ? 1 : 0));
+            registers[A] = (byte)operation;
+            FlagZ = registers[A] == 0;
+            FlagN = false;
+            FlagH = operation > 0x0f;
+            FlagC = registers[A] > 0xff;
+            ConsumeCycle(4);
+        }
+
+        private void ADC_rm(UInt16 registerMemory)
+        {
+            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(registerMemory) + (FlagC ? 1 : 0));
+            registers[A] = (byte)operation;
+            FlagZ = registers[A] == 0;
+            FlagN = false;
+            FlagH = operation > 0x0f;
+            FlagC = registers[A] > 0xff;
+            ConsumeCycle(8);
+        }
+
+        private void ADC_n()
+        {
+            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(PC++) + (FlagC ? 1 : 0));
+            registers[A] = (byte)operation;
+            FlagZ = registers[A] == 0;
+            FlagN = false;
+            FlagH = operation > 0x0f;
+            FlagC = registers[A] > 0xff;
+            ConsumeCycle(8);
+        }
+
+        #endregion
+
+        #region AND
+        private void AND_r(int register)
+        {
+            UInt16 operation = (UInt16)(registers[register] & registers[A]);
+            registers[A] = (byte)operation;
+            FlagH = !(FlagC = FlagN = false);
+            FlagZ = registers[A] == 0;
+            ConsumeCycle(4);
+        }
+
+        private void AND_rm(UInt16 registerMemory)
+        {
+            UInt16 operation = (UInt16)(memoryController.GetPosition(registerMemory) & registers[A]);
+            registers[A] = (byte)operation;
+            FlagH = !(FlagC = FlagN = false);
+            FlagZ = registers[A] == 0;
+            ConsumeCycle(8);
+        }
+
+        private void AND_n()
+        {
+            UInt16 operation = (UInt16)(memoryController.GetPosition(PC++) & registers[A]);
+            registers[A] = (byte)operation;
+            FlagH = !(FlagC = FlagN = false);
+            FlagZ = registers[A] == 0;
+            ConsumeCycle(8);
+        }
         #endregion
 
         #endregion
