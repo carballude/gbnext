@@ -250,14 +250,14 @@ namespace GBNext.Hardware.CPU
                 case 0x95: SUB_r(L); break;
                 case 0x96: SUB_rm(HL); break;
                 case 0x97: SUB_r(A); break;
-                case 152: NotImplemented(152); break;
-                case 153: NotImplemented(153); break;
-                case 154: NotImplemented(154); break;
-                case 155: NotImplemented(155); break;
-                case 156: NotImplemented(156); break;
-                case 157: NotImplemented(157); break;
-                case 158: NotImplemented(158); break;
-                case 159: NotImplemented(159); break;
+                case 0x98: SBC_r(B); break;
+                case 0x99: SBC_r(C); break;
+                case 0x9A: SBC_r(D); break;
+                case 0x9B: SBC_r(E); break;
+                case 0x9C: SBC_r(H); break;
+                case 0x9D: SBC_r(L); break;
+                case 0x9E: SBC_rm(HL); break;
+                case 0x9F: SBC_r(A); break;
                 case 160: NotImplemented(160); break;
                 case 161: NotImplemented(161); break;
                 case 162: NotImplemented(162); break;
@@ -556,12 +556,37 @@ namespace GBNext.Hardware.CPU
 
         #region ALU
 
+        #region SBC
+        private void SBC_r(int register)
+        {            
+            UInt16 operation = (UInt16)(registers[register] + (FlagC ? 1 : 0));
+            FlagH = ((registers[A] & 0x0F) - (registers[register] & 0x0F) - (FlagC ? 1 : 0)) > 0x0F;
+            registers[A] -= (byte)operation;
+            FlagZ = registers[A] == 0;
+            FlagN = true;
+            FlagC = operation > 0xFF;
+            ConsumeCycle(4);
+        }
+
+        private void SBC_rm(UInt16 registerMemory)
+        {
+            UInt16 operation = (UInt16)(memoryController.GetPosition(registerMemory) + (FlagC ? 1 : 0));
+            FlagH = ((registers[A] & 0x0F) - (memoryController.GetPosition(registerMemory) & 0x0F) - (FlagC ? 1 : 0)) > 0x0F;
+            registers[A] -= (byte)operation;
+            FlagZ = registers[A] == 0;
+            FlagN = true;
+            FlagC = operation > 0xFF;
+            ConsumeCycle(8);
+        }
+        #endregion
+
         #region SUB
         private void SUB_r(int register)
         {
+            UInt16 operation = (UInt16)(registers[A] - registers[register]);
             FlagH = (registers[A] & 0x0F) - (registers[register] & 0x0F) > 0x0F;
-            registers[A] -= registers[register];            
-            FlagC = registers[A] > 0xFF;
+            registers[A] -= (byte)operation;            
+            FlagC = operation > 0xFF;
             FlagZ = registers[A] == 0;
             FlagN = true;
             ConsumeCycle(4);
