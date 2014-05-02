@@ -24,7 +24,20 @@ namespace GBNext.Hardware.CPU
         private const int L = 7;
 
         byte[] registers = new byte[8];
-        UInt16 SP;
+
+        UInt16 _SP;
+        UInt16 SP
+        {
+            get
+            {
+                return --_SP;
+            }
+            set
+            {
+                _SP = value;
+            }
+        }
+
         UInt16 PC;
         bool FlagZ, FlagN, FlagH, FlagC, FlagInterrupt, FlagDoubleOpcode;
         bool[] lowerFlags = new bool[4];
@@ -299,7 +312,7 @@ namespace GBNext.Hardware.CPU
                     case 193: NotImplemented(193); break;
                     case 0xC2: JP_cc_nn(JumpCondition.NZ); break;
                     case 0xC3: JP_nn(); break;
-                    case 196: NotImplemented(196); break;
+                    case 0xC4: CALL_cc_nn(JumpCondition.NZ); break;
                     case 197: NotImplemented(197); break;
                     case 0xC6: ADD_n(); break;
                     case 199: NotImplemented(199); break;
@@ -307,15 +320,15 @@ namespace GBNext.Hardware.CPU
                     case 201: NotImplemented(201); break;
                     case 0xCA: JP_cc_nn(JumpCondition.Z); break;
                     case 0XCB: FlagDoubleOpcode = true; break;
-                    case 204: NotImplemented(204); break;
-                    case 205: NotImplemented(205); break;
+                    case 0xCC: CALL_cc_nn(JumpCondition.Z); break;
+                    case 0xCD: CALL(); break;
                     case 0xCE: ADC_n(); break;
                     case 207: NotImplemented(207); break;
                     case 208: NotImplemented(208); break;
                     case 209: NotImplemented(209); break;
                     case 0xD2: JP_cc_nn(JumpCondition.NC); break;
                     case 211: NotImplemented(211); break;
-                    case 212: NotImplemented(212); break;
+                    case 0xD4: CALL_cc_nn(JumpCondition.NC); break;
                     case 213: NotImplemented(213); break;
                     case 0xD6: SUB_nn(); break;
                     case 215: NotImplemented(215); break;
@@ -323,7 +336,7 @@ namespace GBNext.Hardware.CPU
                     case 217: NotImplemented(217); break;
                     case 0xDA: JP_cc_nn(JumpCondition.C); break;
                     case 219: NotImplemented(219); break;
-                    case 220: NotImplemented(220); break;
+                    case 0xDC: CALL_cc_nn(JumpCondition.C); break;
                     case 221: NotImplemented(221); break;
                     case 222: NotImplemented(222); break;
                     case 223: NotImplemented(223); break;
@@ -395,6 +408,13 @@ namespace GBNext.Hardware.CPU
             }
         }
 
+        private void ConsumeCycle(int cycles)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void noop() { }
+
         #region 8-BIT INSTRUCTIONS
 
         #region DEC
@@ -442,6 +462,7 @@ namespace GBNext.Hardware.CPU
 
         #endregion
 
+        #region LD
         private void LD_r_ffnn(int register)
         {
             var lo = memoryController.GetPosition(PC++);
@@ -550,15 +571,8 @@ namespace GBNext.Hardware.CPU
         {
             memoryController.Write(memoryController.GetPosition(registers[register]), memoryController.GetPosition(PC++));
             ConsumeCycle(12);
-        }
-
-        private void ConsumeCycle(int cycles)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        private void noop() { }
+        } 
+        #endregion
 
         #endregion
 
@@ -1077,6 +1091,62 @@ namespace GBNext.Hardware.CPU
         }
 
         #endregion
+
+        #region CALLS
+
+        private void CALL()
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+
+            memoryController.Write(SP, memoryController.GetPosition(PC));
+            
+            PC = (ushort)((hi << 8) | lo);
+
+            ConsumeCycle(12);
+        }
+
+        private void CALL_cc_nn(JumpCondition condition)
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+
+            switch (condition)
+            {
+                case JumpCondition.NZ:
+                    if (!FlagZ)
+                    {
+                        memoryController.Write(SP, memoryController.GetPosition(PC));
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+                case JumpCondition.Z:
+                    if (FlagZ)
+                    {
+                        memoryController.Write(SP, memoryController.GetPosition(PC));
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+                case JumpCondition.NC:
+                    if (!FlagC)
+                    {
+                        memoryController.Write(SP, memoryController.GetPosition(PC));
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+                case JumpCondition.C:
+                    if (FlagC)
+                    {
+                        memoryController.Write(SP, memoryController.GetPosition(PC));
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+            }
+
+            ConsumeCycle(12);
+        }
+        
+        #endregion 
 
         private void NotImplemented(int instruction)
         {
