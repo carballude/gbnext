@@ -101,7 +101,7 @@ namespace GBNext.Hardware.CPU
             {
                 switch (currentInstruction)
                 {
-                    case 0: noop(); break;
+                    case 0x00: noop(); break;
                     case 0x01: LD_rr_nn(BC); break;
                     case 0x02: LD_rm_r(BC, A); break;
                     case 3: NotImplemented(3); break;
@@ -333,7 +333,7 @@ namespace GBNext.Hardware.CPU
                     case 229: NotImplemented(229); break;
                     case 0xE6: AND_n(); break;
                     case 231: NotImplemented(231); break;
-                    case 232: NotImplemented(232); break;
+                    case 0xE8: ADD_SP(); break;
                     case 233: NotImplemented(233); break;
                     case 0xEA: LD_nn_r(A); break;
                     case 235: NotImplemented(235); break;
@@ -376,21 +376,14 @@ namespace GBNext.Hardware.CPU
 
         #region 8-BIT INSTRUCTIONS
 
+        #region DEC
+
         private void DEC_r(int register)
         {
             registers[register]--;
             FlagZ = registers[register] == 0;
             FlagN = true;
             FlagH = (registers[register] & 0x0F) == 0x0F;
-            ConsumeCycle(4);
-        }
-
-        private void INC_r(int register)
-        {
-            registers[register]++;
-            FlagZ = registers[register] == 0;
-            FlagN = false;
-            FlagH = (registers[register] & 0x0F) == 0x00;
             ConsumeCycle(4);
         }
 
@@ -404,6 +397,18 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(12);
         }
 
+        #endregion
+
+        #region INC
+        private void INC_r(int register)
+        {
+            registers[register]++;
+            FlagZ = registers[register] == 0;
+            FlagN = false;
+            FlagH = (registers[register] & 0x0F) == 0x00;
+            ConsumeCycle(4);
+        }
+
         private void INC_rm(UInt16 registerMemory)
         {
             var value = (byte)(memoryController.GetPosition(registerMemory) + 1);
@@ -413,6 +418,8 @@ namespace GBNext.Hardware.CPU
             FlagH = (value & 0x0F) == 0x00;
             ConsumeCycle(12);
         }
+
+        #endregion
 
         private void LD_r_ffnn(int register)
         {
@@ -652,7 +659,7 @@ namespace GBNext.Hardware.CPU
             FlagZ = registers[A] == 0;
             FlagN = false;
             FlagH = operation > 0x0f;
-            FlagC = registers[A] > 0xff;
+            FlagC = operation > 0xff;
             ConsumeCycle(8);
         }
 
@@ -663,8 +670,18 @@ namespace GBNext.Hardware.CPU
             FlagZ = registers[A] == 0;
             FlagN = false;
             FlagH = operation > 0x0f;
-            FlagC = registers[A] > 0xff;
+            FlagC = operation > 0xff;
             ConsumeCycle(8);
+        }
+
+        private void ADD_SP()
+        {
+            UInt16 operation = (UInt16)(SP + (short)memoryController.GetPosition(PC++));
+            SP = operation;
+            FlagZ = FlagN = false;
+            FlagC = operation > 0xFF;
+            FlagH = operation > 0x0F;
+            ConsumeCycle(16);
         }
 
         #endregion
