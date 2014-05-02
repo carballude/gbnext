@@ -88,6 +88,8 @@ namespace GBNext.Hardware.CPU
         }
         #endregion
 
+        private enum JumpCondition { NZ, Z, NC, C };
+
         private void Init()
         {
             PC = 0x100; // 256
@@ -125,7 +127,7 @@ namespace GBNext.Hardware.CPU
                     case 0x15: DEC_r(D); break;
                     case 0x16: LD_r_n(D); break;
                     case 23: NotImplemented(23); break;
-                    case 24: NotImplemented(24); break;
+                    case 0x18: JR_n(); break;
                     case 25: NotImplemented(25); break;
                     case 0x1A: LD_r_rm(A, DE); break;
                     case 27: NotImplemented(27); break;
@@ -133,7 +135,7 @@ namespace GBNext.Hardware.CPU
                     case 0x1D: DEC_r(E); break;
                     case 0x1E: LD_r_n(E); break;
                     case 31: NotImplemented(31); break;
-                    case 32: NotImplemented(32); break;
+                    case 0x20: JR_cc_n(JumpCondition.NZ); break;
                     case 0x21: LD_rr_nn(HL); break;
                     case 0x22: LDI_rm_r(HL, A); break;
                     case 35: NotImplemented(35); break;
@@ -141,7 +143,7 @@ namespace GBNext.Hardware.CPU
                     case 0x25: DEC_r(H); break;
                     case 0x26: LD_r_n(H); break;
                     case 39: NotImplemented(39); break;
-                    case 40: NotImplemented(40); break;
+                    case 0x28: JR_cc_n(JumpCondition.Z); break;
                     case 41: NotImplemented(41); break;
                     case 0x2A: LDI_r_rm(A, HL); break;
                     case 43: NotImplemented(43); break;
@@ -149,7 +151,7 @@ namespace GBNext.Hardware.CPU
                     case 0x2D: DEC_r(L); break;
                     case 0x2E: LD_r_n(L); break;
                     case 47: NotImplemented(47); break;
-                    case 48: NotImplemented(48); break;
+                    case 0x30: JR_cc_n(JumpCondition.NC); break;
                     case 0x31: LD_rr_nn(SP); break;
                     case 0x32: LDD_rm_r(HL, A); break;
                     case 51: NotImplemented(51); break;
@@ -157,7 +159,7 @@ namespace GBNext.Hardware.CPU
                     case 0x35: DEC_rm(HL); break;
                     case 0x36: LD_rm_n(HL); break;
                     case 0x37: SCF(); break;
-                    case 56: NotImplemented(56); break;
+                    case 0x38: JR_cc_n(JumpCondition.C); break;
                     case 57: NotImplemented(57); break;
                     case 0x3A: LDD_r_rm(A, HL); break;
                     case 59: NotImplemented(59); break;
@@ -295,15 +297,15 @@ namespace GBNext.Hardware.CPU
                     case 0xBF: CP_r(A); break;
                     case 192: NotImplemented(192); break;
                     case 193: NotImplemented(193); break;
-                    case 194: NotImplemented(194); break;
-                    case 195: NotImplemented(195); break;
+                    case 0xC2: JP_cc_nn(JumpCondition.NZ); break;
+                    case 0xC3: JP_nn(); break;
                     case 196: NotImplemented(196); break;
                     case 197: NotImplemented(197); break;
                     case 0xC6: ADD_n(); break;
                     case 199: NotImplemented(199); break;
                     case 200: NotImplemented(200); break;
                     case 201: NotImplemented(201); break;
-                    case 202: NotImplemented(202); break;
+                    case 0xCA: JP_cc_nn(JumpCondition.Z); break;
                     case 0XCB: FlagDoubleOpcode = true; break;
                     case 204: NotImplemented(204); break;
                     case 205: NotImplemented(205); break;
@@ -311,7 +313,7 @@ namespace GBNext.Hardware.CPU
                     case 207: NotImplemented(207); break;
                     case 208: NotImplemented(208); break;
                     case 209: NotImplemented(209); break;
-                    case 210: NotImplemented(210); break;
+                    case 0xD2: JP_cc_nn(JumpCondition.NC); break;
                     case 211: NotImplemented(211); break;
                     case 212: NotImplemented(212); break;
                     case 213: NotImplemented(213); break;
@@ -319,7 +321,7 @@ namespace GBNext.Hardware.CPU
                     case 215: NotImplemented(215); break;
                     case 216: NotImplemented(216); break;
                     case 217: NotImplemented(217); break;
-                    case 218: NotImplemented(218); break;
+                    case 0xDA: JP_cc_nn(JumpCondition.C); break;
                     case 219: NotImplemented(219); break;
                     case 220: NotImplemented(220); break;
                     case 221: NotImplemented(221); break;
@@ -334,7 +336,7 @@ namespace GBNext.Hardware.CPU
                     case 0xE6: AND_n(); break;
                     case 231: NotImplemented(231); break;
                     case 0xE8: ADD_SP(); break;
-                    case 233: NotImplemented(233); break;
+                    case 0xE9: JP_rm(HL); break;
                     case 0xEA: LD_nn_r(A); break;
                     case 235: NotImplemented(235); break;
                     case 236: NotImplemented(236); break;
@@ -978,6 +980,103 @@ namespace GBNext.Hardware.CPU
         }
         #endregion
 
+        #region JUMPS
+
+        private void JP_nn()
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            PC = (ushort)((hi << 8) | lo);
+
+            ConsumeCycle(12);
+        }
+
+        private void JP_cc_nn(JumpCondition condition)
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+
+            switch (condition)
+            {
+                case JumpCondition.NZ:
+                    PC = FlagZ ? PC : (ushort)((hi << 8) | lo);
+                    break;
+                case JumpCondition.Z:
+                    PC = FlagZ ? (ushort)((hi << 8) | lo) : PC;
+                    break;
+                case JumpCondition.NC:
+                    PC = FlagC ? PC : (ushort)((hi << 8) | lo);
+                    break;
+                case JumpCondition.C:
+                    PC = FlagC ? (ushort)((hi << 8) | lo) : PC;
+                    break;
+            }
+
+            ConsumeCycle(12);
+        }
+
+        private void JP_rm(UInt16 registerMemory)
+        {
+            PC = memoryController.GetPosition(registerMemory);
+            ConsumeCycle(4);
+        }
+
+        private void JR_n()
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+
+            var jumpValue = (short)((hi << 8) | lo);
+
+            if (jumpValue >= 0)
+            {
+                PC += (ushort) jumpValue;
+            }
+            else
+            {
+                PC -= (ushort) -jumpValue;
+            }
+            ConsumeCycle(8);
+        }
+
+        private void JR_cc_n(JumpCondition condition)
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+
+            var jumpValue = (short)((hi << 8) | lo);
+
+            var updatedPC = PC;
+
+            if (jumpValue >= 0)
+            {
+                updatedPC += (ushort)jumpValue;
+            }
+            else
+            {
+                updatedPC -= (ushort)-jumpValue;
+            }
+
+            switch (condition)
+            {
+                case JumpCondition.NZ:
+                    PC = FlagZ ? PC : updatedPC;
+                    break;
+                case JumpCondition.Z:
+                    PC = FlagZ ? updatedPC : PC;
+                    break;
+                case JumpCondition.NC:
+                    PC = FlagC ? PC : updatedPC;
+                    break;
+                case JumpCondition.C:
+                    PC = FlagC ? updatedPC : PC;
+                    break;
+            }
+
+            ConsumeCycle(8);
+        }
+
+        #endregion
 
         private void NotImplemented(int instruction)
         {
