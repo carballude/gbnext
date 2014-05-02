@@ -370,6 +370,16 @@ namespace GBNext.Hardware.CPU
                     case 0x45: BIT_b_r(L); break;
                     case 0x46: BIT_b_rm(HL); break;
                     case 0x47: BIT_b_r(A); break;
+
+                    case 0x80: RES_b_r(B); break;
+                    case 0x81: RES_b_r(C); break;
+                    case 0x82: RES_b_r(D); break;
+                    case 0x83: RES_b_r(E); break;
+                    case 0x84: RES_b_r(H); break;
+                    case 0x85: RES_b_r(L); break;
+                    case 0x86: RES_b_rm(HL); break;
+                    case 0x87: RES_b_r(A); break;
+
                     case 0xC0: SET_b_r(B); break;
                     case 0xC1: SET_b_r(C); break;
                     case 0xC2: SET_b_r(D); break;
@@ -378,6 +388,7 @@ namespace GBNext.Hardware.CPU
                     case 0xC5: SET_b_r(L); break;
                     case 0xC6: SET_b_rm(HL); break;
                     case 0xC7: SET_b_r(A); break;
+
                 }
             }
         }
@@ -938,7 +949,33 @@ namespace GBNext.Hardware.CPU
             ConsumeCycle(16);
         }
 
+        private void RES_b_r(int register)
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            int bitToReset = (hi << 8) | lo;
 
+            int bitMask = 0xFF;
+            bitMask = 0 << bitToReset;
+            registers[register] = (byte)(bitMask & registers[register]);
+
+            ConsumeCycle(8);
+        }
+
+        private void RES_b_rm(UInt16 registerMemory)
+        {
+            UInt16 value = memoryController.GetPosition(registerMemory);
+
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            int bitToReset = (hi << 8) | lo;
+
+            int bitMask = 0xFF;
+            bitMask = 0 << bitToReset;
+            memoryController.Write(registerMemory, (byte)(bitMask & value));
+
+            ConsumeCycle(16);
+        }
         #endregion
 
 
