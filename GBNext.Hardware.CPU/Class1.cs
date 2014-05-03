@@ -315,7 +315,7 @@ namespace GBNext.Hardware.CPU
                     case 0xC4: CALL_cc_nn(JumpCondition.NZ); break;
                     case 197: NotImplemented(197); break;
                     case 0xC6: ADD_n(); break;
-                    case 199: NotImplemented(199); break;
+                    case 0xC7: RST_n(0x00); break;
                     case 200: NotImplemented(200); break;
                     case 201: NotImplemented(201); break;
                     case 0xCA: JP_cc_nn(JumpCondition.Z); break;
@@ -323,7 +323,7 @@ namespace GBNext.Hardware.CPU
                     case 0xCC: CALL_cc_nn(JumpCondition.Z); break;
                     case 0xCD: CALL(); break;
                     case 0xCE: ADC_n(); break;
-                    case 207: NotImplemented(207); break;
+                    case 0xCF: RST_n(0x08); ; break;
                     case 208: NotImplemented(208); break;
                     case 209: NotImplemented(209); break;
                     case 0xD2: JP_cc_nn(JumpCondition.NC); break;
@@ -331,7 +331,7 @@ namespace GBNext.Hardware.CPU
                     case 0xD4: CALL_cc_nn(JumpCondition.NC); break;
                     case 213: NotImplemented(213); break;
                     case 0xD6: SUB_nn(); break;
-                    case 215: NotImplemented(215); break;
+                    case 0xD7: RST_n(0x10); break;
                     case 216: NotImplemented(216); break;
                     case 217: NotImplemented(217); break;
                     case 0xDA: JP_cc_nn(JumpCondition.C); break;
@@ -339,7 +339,7 @@ namespace GBNext.Hardware.CPU
                     case 0xDC: CALL_cc_nn(JumpCondition.C); break;
                     case 221: NotImplemented(221); break;
                     case 222: NotImplemented(222); break;
-                    case 223: NotImplemented(223); break;
+                    case 0xDF: RST_n(0x18); break;
                     case 0xE0: LD_ffnn_r(A); break;
                     case 225: NotImplemented(225); break;
                     case 0xE2: LD_ffrm_r(C, A); break;
@@ -347,7 +347,7 @@ namespace GBNext.Hardware.CPU
                     case 228: NotImplemented(228); break;
                     case 229: NotImplemented(229); break;
                     case 0xE6: AND_n(); break;
-                    case 231: NotImplemented(231); break;
+                    case 0xE7: RST_n(0x20); break;
                     case 0xE8: ADD_SP(); break;
                     case 0xE9: JP_rm(HL); break;
                     case 0xEA: LD_nn_r(A); break;
@@ -355,7 +355,7 @@ namespace GBNext.Hardware.CPU
                     case 236: NotImplemented(236); break;
                     case 237: NotImplemented(237); break;
                     case 0xEE: XOR_n(); break;
-                    case 239: NotImplemented(239); break;
+                    case 0xEF: RST_n(0x28); break;
                     case 0xF0: LD_r_ffnn(A); break;
                     case 241: NotImplemented(241); break;
                     case 0xF2: LD_r_ffrm(A, C); break;
@@ -363,7 +363,7 @@ namespace GBNext.Hardware.CPU
                     case 244: NotImplemented(244); break;
                     case 245: NotImplemented(245); break;
                     case 0xF6: OR_n(); break;
-                    case 247: NotImplemented(247); break;
+                    case 0xF7: RST_n(0x30); break;
                     case 0xF8: LDHL_SP_n(); break;
                     case 0xF9: LD_rr_rr(SP, HL); break;
                     case 0xFA: LD_r_nn(A); break;
@@ -371,6 +371,7 @@ namespace GBNext.Hardware.CPU
                     case 252: NotImplemented(252); break;
                     case 253: NotImplemented(253); break;
                     case 0xFE: CP_n(); break;
+                    case 0XFF: RST_n(0x38); break;
                 }
             }
             else
@@ -1147,6 +1148,19 @@ namespace GBNext.Hardware.CPU
         }
         
         #endregion 
+
+        #region RST
+
+        private void RST_n(ushort resetAddress)
+        {
+            byte[] bitsPC = BitConverter.GetBytes(PC);
+            memoryController.Write(SP, bitsPC[0]);
+            memoryController.Write(SP, bitsPC[1]);
+
+            PC = resetAddress;
+        }
+
+        #endregion
 
         private void NotImplemented(int instruction)
         {
