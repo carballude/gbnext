@@ -308,7 +308,7 @@ namespace GBNext.Hardware.CPU
                     case 0xBD: CP_r(L); break;
                     case 0xBE: CP_rm(HL); break;
                     case 0xBF: CP_r(A); break;
-                    case 192: NotImplemented(192); break;
+                    case 0xC0: RET_cc(JumpCondition.NC); break;
                     case 193: NotImplemented(193); break;
                     case 0xC2: JP_cc_nn(JumpCondition.NZ); break;
                     case 0xC3: JP_nn(); break;
@@ -316,15 +316,15 @@ namespace GBNext.Hardware.CPU
                     case 197: NotImplemented(197); break;
                     case 0xC6: ADD_n(); break;
                     case 0xC7: RST_n(0x00); break;
-                    case 200: NotImplemented(200); break;
-                    case 201: NotImplemented(201); break;
+                    case 0xC8: RET_cc(JumpCondition.Z); break;
+                    case 0xC9: RET(); break;
                     case 0xCA: JP_cc_nn(JumpCondition.Z); break;
                     case 0XCB: FlagDoubleOpcode = true; break;
                     case 0xCC: CALL_cc_nn(JumpCondition.Z); break;
                     case 0xCD: CALL(); break;
                     case 0xCE: ADC_n(); break;
                     case 0xCF: RST_n(0x08); ; break;
-                    case 208: NotImplemented(208); break;
+                    case 0xD0: RET_cc(JumpCondition.NC); break;
                     case 209: NotImplemented(209); break;
                     case 0xD2: JP_cc_nn(JumpCondition.NC); break;
                     case 211: NotImplemented(211); break;
@@ -332,8 +332,8 @@ namespace GBNext.Hardware.CPU
                     case 213: NotImplemented(213); break;
                     case 0xD6: SUB_nn(); break;
                     case 0xD7: RST_n(0x10); break;
-                    case 216: NotImplemented(216); break;
-                    case 217: NotImplemented(217); break;
+                    case 0xD8: RET_cc(JumpCondition.C); break;
+                    case 0xD9: RETI(); break;
                     case 0xDA: JP_cc_nn(JumpCondition.C); break;
                     case 219: NotImplemented(219); break;
                     case 0xDC: CALL_cc_nn(JumpCondition.C); break;
@@ -1149,7 +1149,7 @@ namespace GBNext.Hardware.CPU
         
         #endregion 
 
-        #region RST
+        #region RESTARTS
 
         private void RST_n(ushort resetAddress)
         {
@@ -1158,6 +1158,79 @@ namespace GBNext.Hardware.CPU
             memoryController.Write(SP, bitsPC[1]);
 
             PC = resetAddress;
+
+            ConsumeCycle(32);
+        }
+
+        #endregion
+
+        #region RETURNS
+
+        private void RET_cc(JumpCondition condition)
+        {
+            switch (condition)
+            {
+                case JumpCondition.NZ:
+                    if (!FlagZ)
+                    {
+                        var lo = memoryController.GetPosition(_SP++);
+                        var hi = memoryController.GetPosition(_SP++);
+
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+                case JumpCondition.Z:
+                    if (FlagZ)
+                    {
+                        var lo = memoryController.GetPosition(_SP++);
+                        var hi = memoryController.GetPosition(_SP++);
+
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+                case JumpCondition.NC:
+                    if (!FlagC)
+                    {
+                        var lo = memoryController.GetPosition(_SP++);
+                        var hi = memoryController.GetPosition(_SP++);
+
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+                case JumpCondition.C:
+                    if (FlagC)
+                    {
+                        var lo = memoryController.GetPosition(_SP++);
+                        var hi = memoryController.GetPosition(_SP++);
+
+                        PC = (ushort)((hi << 8) | lo);
+                    }
+                    break;
+            }
+            
+            ConsumeCycle(8);
+        }
+
+        private void RET()
+        {
+            var lo = memoryController.GetPosition(_SP++);
+            var hi = memoryController.GetPosition(_SP++);
+
+            PC = (ushort)((hi << 8) | lo);
+
+            ConsumeCycle(8);
+        }
+
+        private void RETI()
+        {
+            var lo = memoryController.GetPosition(_SP++);
+            var hi = memoryController.GetPosition(_SP++);
+
+            PC = (ushort)((hi << 8) | lo);
+
+            FlagInterrupt = true;
+
+            ConsumeCycle(8);
         }
 
         #endregion
