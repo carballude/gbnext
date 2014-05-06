@@ -119,13 +119,13 @@ namespace GBNext.Hardware.CPU
                     case 0x00: noop(); break;
                     case 0x01: LD_rr_nn(BC); break;
                     case 0x02: LD_rm_r(BC, A); break;
-                    case 3: NotImplemented(3); break;
+                    case 0x03: INC_rr(B,C); break;
                     case 0x04: INC_r(B); break;
                     case 0x05: DEC_r(B); break;
                     case 0x06: LD_r_n(B); break;
-                    case 7: NotImplemented(7); break;
+                    case 0x07: RLCA(); break;
                     case 0x08: LD_nn_SP(); break;
-                    case 9: NotImplemented(9); break;
+                    case 0x09: ADD_HL_rr(BC); break;
                     case 0x0A: LD_r_rm(A, BC); break;
                     case 11: NotImplemented(11); break;
                     case 0x0C: INC_r(C); break;
@@ -135,13 +135,13 @@ namespace GBNext.Hardware.CPU
                     case 16: NotImplemented(16); break;
                     case 0x11: LD_rr_nn(DE); break;
                     case 0x12: LD_rm_r(DE, A); break;
-                    case 19: NotImplemented(19); break;
+                    case 0x13: INC_rr(D,E); break;
                     case 0x14: INC_r(D); break;
                     case 0x15: DEC_r(D); break;
                     case 0x16: LD_r_n(D); break;
                     case 23: NotImplemented(23); break;
                     case 0x18: JR_n(); break;
-                    case 25: NotImplemented(25); break;
+                    case 0x19: ADD_HL_rr(DE); break;
                     case 0x1A: LD_r_rm(A, DE); break;
                     case 27: NotImplemented(27); break;
                     case 0x1C: INC_r(E); break;
@@ -151,13 +151,13 @@ namespace GBNext.Hardware.CPU
                     case 0x20: JR_cc_n(JumpCondition.NZ); break;
                     case 0x21: LD_rr_nn(HL); break;
                     case 0x22: LDI_rm_r(HL, A); break;
-                    case 35: NotImplemented(35); break;
+                    case 0x23: INC_rr(H, L); break;
                     case 0x24: INC_r(H); break;
                     case 0x25: DEC_r(H); break;
                     case 0x26: LD_r_n(H); break;
                     case 39: NotImplemented(39); break;
                     case 0x28: JR_cc_n(JumpCondition.Z); break;
-                    case 41: NotImplemented(41); break;
+                    case 0x29: ADD_HL_rr(HL); break;
                     case 0x2A: LDI_r_rm(A, HL); break;
                     case 43: NotImplemented(43); break;
                     case 0x2C: INC_r(L); break;
@@ -167,13 +167,13 @@ namespace GBNext.Hardware.CPU
                     case 0x30: JR_cc_n(JumpCondition.NC); break;
                     case 0x31: LD_rr_nn(SP); break;
                     case 0x32: LDD_rm_r(HL, A); break;
-                    case 51: NotImplemented(51); break;
+                    case 0x33: INC_SP(); break;
                     case 0x34: INC_rm(HL); break;
                     case 0x35: DEC_rm(HL); break;
                     case 0x36: LD_rm_n(HL); break;
                     case 0x37: SCF(); break;
                     case 0x38: JR_cc_n(JumpCondition.C); break;
-                    case 57: NotImplemented(57); break;
+                    case 0x39: ADD_HL_rr(_SP); break;
                     case 0x3A: LDD_r_rm(A, HL); break;
                     case 59: NotImplemented(59); break;
                     case 0x3C: INC_r(A); break;
@@ -284,14 +284,14 @@ namespace GBNext.Hardware.CPU
                     case 0xA5: AND_r(L); break;
                     case 0xA6: AND_rm(HL); break;
                     case 0xA7: AND_r(A); break;
-                    case 168: XOR_r(B); break;
-                    case 169: XOR_r(C); break;
-                    case 170: XOR_r(D); break;
-                    case 171: XOR_r(E); break;
-                    case 172: XOR_r(H); break;
-                    case 173: XOR_r(L); break;
-                    case 174: XOR_rm(HL); break;
-                    case 175: XOR_r(A); break;
+                    case 0xA8: XOR_r(B); break;
+                    case 0xA9: XOR_r(C); break;
+                    case 0xAA: XOR_r(D); break;
+                    case 0xAB: XOR_r(E); break;
+                    case 0xAC: XOR_r(H); break;
+                    case 0xAD: XOR_r(L); break;
+                    case 0xAE: XOR_rm(HL); break;
+                    case 0xAF: XOR_r(A); break;
                     case 0xB0: OR_r(B); break;
                     case 0xB1: OR_r(C); break;
                     case 0xB2: OR_r(D); break;
@@ -308,7 +308,7 @@ namespace GBNext.Hardware.CPU
                     case 0xBD: CP_r(L); break;
                     case 0xBE: CP_rm(HL); break;
                     case 0xBF: CP_r(A); break;
-                    case 0xC0: RET_cc(JumpCondition.NC); break;
+                    case 0xC0: RET_cc(JumpCondition.NZ); break;
                     case 193: NotImplemented(193); break;
                     case 0xC2: JP_cc_nn(JumpCondition.NZ); break;
                     case 0xC3: JP_nn(); break;
@@ -407,6 +407,45 @@ namespace GBNext.Hardware.CPU
 
                 }
             }
+        }
+
+        private void ADD_HL_rr(ushort BC)
+        {
+            var operation = HL + BC;
+            byte hi = (byte)(operation >> 8);
+            byte lo = (byte)operation;
+            registers[H] = hi;
+            registers[L] = lo;
+            FlagN = false;
+            FlagC = (operation & 0x8000) == 0x8000;
+            FlagH = (operation & 0x800) == 0x800;
+            ConsumeCycle(8);
+        }
+
+        private void RLCA()
+        {
+            FlagC = (registers[A] & 0x80) == 0x80;
+            registers[A] = (byte)(registers[A] << 1);
+            FlagZ = registers[A] == 0;
+            FlagH = FlagN = false;
+            ConsumeCycle(4);
+        }
+
+        private void INC_SP()
+        {
+            ++_SP;
+        }
+
+        private void INC_rr(int R, int R2)
+        {
+            if (registers[R2] == 0xFF)
+            {
+                registers[R2] = 0x00;
+                ++registers[R];
+            }
+            else
+                ++registers[R2];
+            ConsumeCycle(8);
         }
 
         private void ConsumeCycle(int cycles)

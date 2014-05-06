@@ -35,8 +35,20 @@ namespace GBNext.Disassembler
                     case "show":
                         ShowCode(command);
                         break;
+                    case "status":
+                        PrintDevelopementStatus();
+                        break;
                 }
             } while (command.First() != "exit");
+        }
+
+        private void PrintDevelopementStatus()
+        {
+            var counter = 0;
+            for (int i = 0; i < 256; i++)
+                if(Mnemonics.Mnemonic((byte)i).CompareTo("UNKNOWN")==0)
+                    counter++;
+            Console.WriteLine("So far {0} out of 256 instructions have been implemented. Only {1} to go!", 256 - counter, counter);
         }
 
         private void ShowCode(string[] command)
