@@ -9,7 +9,7 @@ namespace GBNext.Disassembler
 {
     class Program
     {
-
+        //Delete this comment
         private string cartridgePath;
 
         private byte[] cartridge;
