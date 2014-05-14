@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GBNext.Hardware.CPU
 {
-    public class Class1
+    public partial class CPU
     {
 
         private IMemoryController memoryController;
@@ -116,7 +116,7 @@ namespace GBNext.Hardware.CPU
             {
                 switch (currentInstruction)
                 {
-                    case 0x00: noop(); break;
+                    case 0x00: NOP(); break;
                     case 0x01: LD_rr_nn(BC); break;
                     case 0x02: LD_rm_r(BC, A); break;
                     case 0x03: INC_rr(B,C); break;
@@ -132,7 +132,7 @@ namespace GBNext.Hardware.CPU
                     case 0x0D: DEC_r(C); break;
                     case 0x0E: LD_r_n(C); break;
                     case 15: NotImplemented(15); break;
-                    case 16: NotImplemented(16); break;
+                    case 0x10: STOP(); break;
                     case 0x11: LD_rr_nn(DE); break;
                     case 0x12: LD_rm_r(DE, A); break;
                     case 0x13: INC_rr(D,E); break;
@@ -155,7 +155,7 @@ namespace GBNext.Hardware.CPU
                     case 0x24: INC_r(H); break;
                     case 0x25: DEC_r(H); break;
                     case 0x26: LD_r_n(H); break;
-                    case 39: NotImplemented(39); break;
+                    case 0x27: DAA(); break;
                     case 0x28: JR_cc_n(JumpCondition.Z); break;
                     case 0x29: ADD_HL_rr(HL); break;
                     case 0x2A: LDI_r_rm(A, HL); break;
@@ -163,7 +163,7 @@ namespace GBNext.Hardware.CPU
                     case 0x2C: INC_r(L); break;
                     case 0x2D: DEC_r(L); break;
                     case 0x2E: LD_r_n(L); break;
-                    case 47: NotImplemented(47); break;
+                    case 0x2F: CPL(); break;
                     case 0x30: JR_cc_n(JumpCondition.NC); break;
                     case 0x31: LD_rr_nn(SP); break;
                     case 0x32: LDD_rm_r(HL, A); break;
@@ -378,6 +378,16 @@ namespace GBNext.Hardware.CPU
             {
                 switch (currentInstruction)
                 {
+
+                    case 0x30: SWAP_r(B); break;
+                    case 0x31: SWAP_r(C); break;
+                    case 0x32: SWAP_r(D); break;
+                    case 0x33: SWAP_r(E); break;
+                    case 0x34: SWAP_r(H); break;
+                    case 0x35: SWAP_r(L); break;
+                    case 0x36: SWAP_rm(HL); break;
+                    case 0x37: SWAP_r(A); break;
+
                     case 0x40: BIT_b_r(B); break;
                     case 0x41: BIT_b_r(C); break;
                     case 0x42: BIT_b_r(D); break;
@@ -453,7 +463,7 @@ namespace GBNext.Hardware.CPU
             throw new NotImplementedException();
         }
 
-        private void noop() { }
+        
 
         #region 8-BIT INSTRUCTIONS
 
@@ -910,42 +920,6 @@ namespace GBNext.Hardware.CPU
 
         #endregion
 
-        #region MISCELLANEOUS
-
-        private void CCF()
-        {
-            FlagC = !FlagC;
-            FlagN = false;
-            FlagH = false;
-            ConsumeCycle(4);
-        }
-
-        private void SCF()
-        {
-            FlagC = true;
-            FlagN = false;
-            FlagH = false;
-            ConsumeCycle(4);
-        }
-
-        private void HALT()
-        {
-            NotImplemented(0x76);
-        }
-
-        private void DI()
-        {
-            FlagInterrupt = false;
-            ConsumeCycle(4);
-        }
-
-        private void EI()
-        {
-            FlagInterrupt = true;
-            ConsumeCycle(4);
-        }
-
-        #endregion
 
         #region BIT
 
