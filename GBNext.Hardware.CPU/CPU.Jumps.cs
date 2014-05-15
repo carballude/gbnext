@@ -9,7 +9,6 @@ namespace GBNext.Hardware.CPU
     public partial class CPU
     {
 
-
         /// <summary>
         /// Jump to address nn.
         /// </summary>

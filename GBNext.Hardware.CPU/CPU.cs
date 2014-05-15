@@ -103,15 +103,21 @@ namespace GBNext.Hardware.CPU
 
         private enum JumpCondition { NZ, Z, NC, C };
 
+        /// <summary>
+        /// Initializes the emulation.
+        /// </summary>
         private void Init()
         {
             PC = 0x100; // 256
             SP = 0xFFFE; // 65534
         }
 
+        /// <summary>
+        /// Executes the instruction selected.
+        /// </summary>
+        /// <param name="currentInstruction">The current instruction.</param>
         public void ExecuteInstruction(byte currentInstruction)
         {
-
             if (!FlagDoubleOpcode)
             {
                 switch (currentInstruction)
@@ -127,11 +133,11 @@ namespace GBNext.Hardware.CPU
                     case 0x08: LD_nn_SP(); break;
                     case 0x09: ADD_HL_rr(BC); break;
                     case 0x0A: LD_r_rm(A, BC); break;
-                    case 11: NotImplemented(11); break;
+                    case 0x0B: DEC_rr(B,C); break;
                     case 0x0C: INC_r(C); break;
                     case 0x0D: DEC_r(C); break;
                     case 0x0E: LD_r_n(C); break;
-                    case 15: NotImplemented(15); break;
+                    case 0x0F: RRCA(); break;
                     case 0x10: STOP(); break;
                     case 0x11: LD_rr_nn(DE); break;
                     case 0x12: LD_rm_r(DE, A); break;
@@ -139,15 +145,15 @@ namespace GBNext.Hardware.CPU
                     case 0x14: INC_r(D); break;
                     case 0x15: DEC_r(D); break;
                     case 0x16: LD_r_n(D); break;
-                    case 23: NotImplemented(23); break;
+                    case 0x17: RLA(); break;
                     case 0x18: JR_n(); break;
                     case 0x19: ADD_HL_rr(DE); break;
                     case 0x1A: LD_r_rm(A, DE); break;
-                    case 27: NotImplemented(27); break;
+                    case 0x1B: DEC_rr(D,E); break;
                     case 0x1C: INC_r(E); break;
                     case 0x1D: DEC_r(E); break;
                     case 0x1E: LD_r_n(E); break;
-                    case 31: NotImplemented(31); break;
+                    case 0x1F: RRA(); break;
                     case 0x20: JR_cc_n(JumpCondition.NZ); break;
                     case 0x21: LD_rr_nn(HL); break;
                     case 0x22: LDI_rm_r(HL, A); break;
@@ -159,7 +165,7 @@ namespace GBNext.Hardware.CPU
                     case 0x28: JR_cc_n(JumpCondition.Z); break;
                     case 0x29: ADD_HL_rr(HL); break;
                     case 0x2A: LDI_r_rm(A, HL); break;
-                    case 43: NotImplemented(43); break;
+                    case 0x2B: DEC_rr(H, L); break;
                     case 0x2C: INC_r(L); break;
                     case 0x2D: DEC_r(L); break;
                     case 0x2E: LD_r_n(L); break;
@@ -175,7 +181,7 @@ namespace GBNext.Hardware.CPU
                     case 0x38: JR_cc_n(JumpCondition.C); break;
                     case 0x39: ADD_HL_rr(_SP); break;
                     case 0x3A: LDD_r_rm(A, HL); break;
-                    case 59: NotImplemented(59); break;
+                    case 0x3B: DEC_SP(); break;
                     case 0x3C: INC_r(A); break;
                     case 0x3D: DEC_r(A); break;
                     case 0x3E: LD_r_n(A); break;
@@ -379,6 +385,54 @@ namespace GBNext.Hardware.CPU
                 switch (currentInstruction)
                 {
 
+                    case 0x00: RLC_r(B); break;
+                    case 0x01: RLC_r(C); break;
+                    case 0x02: RLC_r(D); break;
+                    case 0x03: RLC_r(E); break;
+                    case 0x04: RLC_r(H); break;
+                    case 0x05: RLC_r(L); break;
+                    case 0x06: RLC_rm(HL); break;
+                    case 0x07: RLC_r(A); break;
+                    case 0x08: RRC_r(B); break;
+                    case 0x09: RRC_r(C); break;
+                    case 0x0A: RRC_r(D); break;
+                    case 0x0B: RRC_r(E); break;
+                    case 0x0C: RRC_r(H); break;
+                    case 0x0D: RRC_r(L); break;
+                    case 0x0E: RRC_rm(HL); break;
+                    case 0x0F: RRC_r(A); break;
+                    case 0x10: RL_r(B); break;
+                    case 0x11: RL_r(C); break;
+                    case 0x12: RL_r(D); break;
+                    case 0x13: RL_r(E); break;
+                    case 0x14: RL_r(H); break;
+                    case 0x15: RL_r(L); break;
+                    case 0x16: RL_rm(HL); break;
+                    case 0x17: RL_r(A); break;
+                    case 0x18: RR_r(B); break;
+                    case 0x19: RR_r(C); break;
+                    case 0x1A: RR_r(D); break;
+                    case 0x1B: RR_r(E); break;
+                    case 0x1C: RR_r(H); break;
+                    case 0x1D: RR_r(L); break;
+                    case 0x1E: RR_rm(HL); break;
+                    case 0x1F: RR_r(A); break;
+                    case 0x20: SLA_r(B); break;
+                    case 0x21: SLA_r(C); break;
+                    case 0x22: SLA_r(D); break;
+                    case 0x23: SLA_r(E); break;
+                    case 0x24: SLA_r(H); break;
+                    case 0x25: SLA_r(L); break;
+                    case 0x26: SLA_rm(HL); break;
+                    case 0x27: SLA_r(A); break;
+                    case 0x28: SRA_r(B); break;
+                    case 0x29: SRA_r(C); break;
+                    case 0x2A: SRA_r(D); break;
+                    case 0x2B: SRA_r(E); break;
+                    case 0x2C: SRA_r(H); break;
+                    case 0x2D: SRA_r(L); break;
+                    case 0x2E: SRA_rm(HL); break;
+                    case 0x2F: SRA_r(A); break;
                     case 0x30: SWAP_r(B); break;
                     case 0x31: SWAP_r(C); break;
                     case 0x32: SWAP_r(D); break;
@@ -387,7 +441,14 @@ namespace GBNext.Hardware.CPU
                     case 0x35: SWAP_r(L); break;
                     case 0x36: SWAP_rm(HL); break;
                     case 0x37: SWAP_r(A); break;
-
+                    case 0x38: SRL_r(B); break;
+                    case 0x39: SRL_r(C); break;
+                    case 0x3A: SRL_r(D); break;
+                    case 0x3B: SRL_r(E); break;
+                    case 0x3C: SRL_r(H); break;
+                    case 0x3D: SRL_r(L); break;
+                    case 0x3E: SRL_rm(HL); break;
+                    case 0x3F: SRL_r(A); break;
                     case 0x40: BIT_b_r(B); break;
                     case 0x41: BIT_b_r(C); break;
                     case 0x42: BIT_b_r(D); break;
@@ -419,516 +480,23 @@ namespace GBNext.Hardware.CPU
             }
         }
 
-        private void ADD_HL_rr(ushort BC)
-        {
-            var operation = HL + BC;
-            byte hi = (byte)(operation >> 8);
-            byte lo = (byte)operation;
-            registers[H] = hi;
-            registers[L] = lo;
-            FlagN = false;
-            FlagC = (operation & 0x8000) == 0x8000;
-            FlagH = (operation & 0x800) == 0x800;
-            ConsumeCycle(8);
-        }
 
-        private void RLCA()
-        {
-            FlagC = (registers[A] & 0x80) == 0x80;
-            registers[A] = (byte)(registers[A] << 1);
-            FlagZ = registers[A] == 0;
-            FlagH = FlagN = false;
-            ConsumeCycle(4);
-        }
-
-        private void INC_SP()
-        {
-            ++_SP;
-        }
-
-        private void INC_rr(int R, int R2)
-        {
-            if (registers[R2] == 0xFF)
-            {
-                registers[R2] = 0x00;
-                ++registers[R];
-            }
-            else
-                ++registers[R2];
-            ConsumeCycle(8);
-        }
-
+        /// <summary>
+        /// Consumes CPU cycles.
+        /// </summary>
+        /// <param name="cycles">The number of cycles.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
         private void ConsumeCycle(int cycles)
         {
             throw new NotImplementedException();
         }
 
-        
 
-        #region 8-BIT INSTRUCTIONS
-
-        #region DEC
-
-        private void DEC_r(int register)
-        {
-            registers[register]--;
-            FlagZ = registers[register] == 0;
-            FlagN = true;
-            FlagH = (registers[register] & 0x0F) == 0x0F;
-            ConsumeCycle(4);
-        }
-
-        private void DEC_rm(UInt16 registerMemory)
-        {
-            var value = (byte)(memoryController.GetPosition(registerMemory) + 1);
-            memoryController.Write(registerMemory, value);
-            FlagZ = value == 0;
-            FlagN = true;
-            FlagH = (value & 0x0F) == 0x0F;
-            ConsumeCycle(12);
-        }
-
-        #endregion
-
-        #region INC
-        private void INC_r(int register)
-        {
-            registers[register]++;
-            FlagZ = registers[register] == 0;
-            FlagN = false;
-            FlagH = (registers[register] & 0x0F) == 0x00;
-            ConsumeCycle(4);
-        }
-
-        private void INC_rm(UInt16 registerMemory)
-        {
-            var value = (byte)(memoryController.GetPosition(registerMemory) + 1);
-            memoryController.Write(registerMemory, value);
-            FlagZ = value == 0;
-            FlagN = true;
-            FlagH = (value & 0x0F) == 0x00;
-            ConsumeCycle(12);
-        }
-
-        #endregion
-
-        #region LD
-        private void LD_r_ffnn(int register)
-        {
-            var lo = memoryController.GetPosition(PC++);
-            var hi = memoryController.GetPosition(PC++);
-            registers[register] = memoryController.GetPosition((ushort)(0xFF00 + (ushort)((hi << 8) | lo)));
-            ConsumeCycle(12);
-        }
-
-        private void LD_ffnn_r(int register)
-        {
-            var lo = memoryController.GetPosition(PC++);
-            var hi = memoryController.GetPosition(PC++);
-            memoryController.Write(memoryController.GetPosition((ushort)(0xFF00 + (ushort)((hi << 8) | lo))), registers[register]);
-            ConsumeCycle(12);
-        }
-
-        private void LDD_rm_r(UInt16 registerMemory, int register)
-        {
-            memoryController.Write(registerMemory, registers[register]);
-            registers[L]--;
-            ConsumeCycle(8);
-        }
-
-        private void LDI_r_rm(int register, UInt16 registerMemory)
-        {
-            registers[register] = memoryController.GetPosition(registerMemory);
-            registers[L]++;
-            ConsumeCycle(8);
-        }
-
-        private void LDI_rm_r(UInt16 registerMemory, int register)
-        {
-            memoryController.Write(registerMemory, registers[register]);
-            registers[L]++;
-            ConsumeCycle(8);
-        }
-
-        private void LDD_r_rm(int register, UInt16 registerMemory)
-        {
-            registers[register] = memoryController.GetPosition(registerMemory);
-            registers[L]--;
-            ConsumeCycle(8);
-        }
-
-        private void LD_rm_r(UInt16 registerMemory, int register)
-        {
-            memoryController.Write(registerMemory, registers[register]);
-            ConsumeCycle(8);
-        }
-
-        private void LD_r_r(int to, int from)
-        {
-            memoryController.Write(registers[to], registers[from]);
-            ConsumeCycle(4);
-        }
-
-        private void LD_r_rm(int register, UInt16 registryMemory)
-        {
-            registers[register] = memoryController.GetPosition(registryMemory);
-            ConsumeCycle(8);
-        }
-
-        private void LD_r_ffrm(int to, int from)
-        {
-            registers[to] = memoryController.GetPosition((UInt16)(0xFF00 + registers[from]));
-            ConsumeCycle(8);
-        }
-
-        private void LD_ffrm_r(int to, int from)
-        {
-            memoryController.Write(memoryController.GetPosition((UInt16)(0xFF00 + registers[to])), registers[from]);
-            ConsumeCycle(8);
-        }
-
-        private void LD_r_nn(int register)
-        {
-            var lo = memoryController.GetPosition(PC++);
-            var hi = memoryController.GetPosition(PC++);
-            registers[register] = memoryController.GetPosition((ushort)((hi << 8) | lo));
-            ConsumeCycle(16);
-        }
-
-        private void LD_nn_r(int register)
-        {
-            var lo = memoryController.GetPosition(PC++);
-            var hi = memoryController.GetPosition(PC++);
-            memoryController.Write((ushort)((hi << 8) | lo), registers[register]);
-            ConsumeCycle(16);
-        }
-
-        private void LD_L_m()
-        {
-            registers[L] = memoryController.GetPosition((ushort)HL);
-            ConsumeCycle(8);
-        }
-
-        private void LD_X_X() { ConsumeCycle(4); }
-
-        private void LD_r_n(int register)
-        {
-            registers[register] = memoryController.GetPosition(PC++);
-            ConsumeCycle(8);
-        }
-
-        private void LD_rm_n(UInt16 register)
-        {
-            memoryController.Write(memoryController.GetPosition(registers[register]), memoryController.GetPosition(PC++));
-            ConsumeCycle(12);
-        } 
-        #endregion
-
-        #endregion
-
-        #region 16-BIT INSTRUCTIONS
-
-        private void LD_rr_nn(UInt16 registry)
-        {
-            var lo = memoryController.GetPosition(PC++);
-            var hi = memoryController.GetPosition(PC++);
-            registry = (ushort)((hi << 8) | lo);
-            ConsumeCycle(12);
-        }
-
-        private void LD_rr_rr(UInt16 to, UInt16 from)
-        {
-            to = from;
-            ConsumeCycle(8);
-        }
-
-        private void LDHL_SP_n()
-        {
-            var n = (sbyte)memoryController.GetPosition(PC++);
-            FlagH = ((SP & 0x0F) + (n & 0x0F)) > 0x0F;
-            FlagC = ((SP & 0xFF) + (n & 0xFF)) > 0xFF;
-            FlagZ = FlagN = false;
-            ConsumeCycle(12);
-        }
-
-        private void LD_nn_SP()
-        {
-            var lo = memoryController.GetPosition(PC++);
-            var hi = memoryController.GetPosition(PC++);
-            var address = (ushort)((hi << 8) | lo);
-            memoryController.Write(address, (byte)SP);
-            ConsumeCycle(20);
-        }
-
-        #endregion
-
-        #region ALU
-
-        #region SBC
-        private void SBC_r(int register)
-        {
-            UInt16 operation = (UInt16)(registers[register] + (FlagC ? 1 : 0));
-            FlagH = ((registers[A] & 0x0F) - (registers[register] & 0x0F) - (FlagC ? 1 : 0)) > 0x0F;
-            registers[A] -= (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = true;
-            FlagC = operation > 0xFF;
-            ConsumeCycle(4);
-        }
-
-        private void SBC_rm(UInt16 registerMemory)
-        {
-            UInt16 operation = (UInt16)(memoryController.GetPosition(registerMemory) + (FlagC ? 1 : 0));
-            FlagH = ((registers[A] & 0x0F) - (memoryController.GetPosition(registerMemory) & 0x0F) - (FlagC ? 1 : 0)) > 0x0F;
-            registers[A] -= (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = true;
-            FlagC = operation > 0xFF;
-            ConsumeCycle(8);
-        }
-        #endregion
-
-        #region SUB
-        private void SUB_r(int register)
-        {
-            UInt16 operation = (UInt16)(registers[A] - registers[register]);
-            FlagH = (registers[A] & 0x0F) - (registers[register] & 0x0F) > 0x0F;
-            registers[A] -= (byte)operation;
-            FlagC = operation > 0xFF;
-            FlagZ = registers[A] == 0;
-            FlagN = true;
-            ConsumeCycle(4);
-        }
-
-        private void SUB_rm(UInt16 registerMemory)
-        {
-            var x = memoryController.GetPosition(registerMemory);
-            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
-            registers[A] -= x;
-            FlagC = registers[A] > 0xFF;
-            FlagZ = registers[A] == 0;
-            FlagN = true;
-            ConsumeCycle(8);
-        }
-
-        private void SUB_nn()
-        {
-            var x = memoryController.GetPosition(PC++);
-            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
-            registers[A] -= x;
-            FlagC = registers[A] > 0xFF;
-            FlagZ = registers[A] == 0;
-            FlagN = true;
-            ConsumeCycle(8);
-        }
-
-        #endregion
-
-        #region ADD
-
-        private void ADD_r(int register)
-        {
-            UInt16 operation = (UInt16)(registers[A] + registers[register]);
-            registers[A] = (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = false;
-            FlagH = operation > 0x0f;
-            FlagC = registers[A] > 0xff;
-            ConsumeCycle(4);
-        }
-
-        private void ADD_rm(UInt16 registerMemory)
-        {
-            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(registerMemory));
-            registers[A] = (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = false;
-            FlagH = operation > 0x0f;
-            FlagC = operation > 0xff;
-            ConsumeCycle(8);
-        }
-
-        private void ADD_n()
-        {
-            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(PC++));
-            registers[A] = (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = false;
-            FlagH = operation > 0x0f;
-            FlagC = operation > 0xff;
-            ConsumeCycle(8);
-        }
-
-        private void ADD_SP()
-        {
-            UInt16 operation = (UInt16)(SP + (short)memoryController.GetPosition(PC++));
-            SP = operation;
-            FlagZ = FlagN = false;
-            FlagC = operation > 0xFF;
-            FlagH = operation > 0x0F;
-            ConsumeCycle(16);
-        }
-
-        #endregion
-
-        #region ADC
-
-        private void ADC_r(int register)
-        {
-            UInt16 operation = (UInt16)(registers[A] + registers[register] + (FlagC ? 1 : 0));
-            registers[A] = (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = false;
-            FlagH = operation > 0x0f;
-            FlagC = registers[A] > 0xff;
-            ConsumeCycle(4);
-        }
-
-        private void ADC_rm(UInt16 registerMemory)
-        {
-            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(registerMemory) + (FlagC ? 1 : 0));
-            registers[A] = (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = false;
-            FlagH = operation > 0x0f;
-            FlagC = registers[A] > 0xff;
-            ConsumeCycle(8);
-        }
-
-        private void ADC_n()
-        {
-            UInt16 operation = (UInt16)(registers[A] + memoryController.GetPosition(PC++) + (FlagC ? 1 : 0));
-            registers[A] = (byte)operation;
-            FlagZ = registers[A] == 0;
-            FlagN = false;
-            FlagH = operation > 0x0f;
-            FlagC = registers[A] > 0xff;
-            ConsumeCycle(8);
-        }
-
-        #endregion
-
-        #region AND
-        private void AND_r(int register)
-        {
-            UInt16 operation = (UInt16)(registers[register] & registers[A]);
-            registers[A] = (byte)operation;
-            FlagH = !(FlagC = FlagN = false);
-            FlagZ = registers[A] == 0;
-            ConsumeCycle(4);
-        }
-
-        private void AND_rm(UInt16 registerMemory)
-        {
-            UInt16 operation = (UInt16)(memoryController.GetPosition(registerMemory) & registers[A]);
-            registers[A] = (byte)operation;
-            FlagH = !(FlagC = FlagN = false);
-            FlagZ = registers[A] == 0;
-            ConsumeCycle(8);
-        }
-
-        private void AND_n()
-        {
-            UInt16 operation = (UInt16)(memoryController.GetPosition(PC++) & registers[A]);
-            registers[A] = (byte)operation;
-            FlagH = !(FlagC = FlagN = false);
-            FlagZ = registers[A] == 0;
-            ConsumeCycle(8);
-        }
-        #endregion
-
-        #region OR
-        private void OR_r(int register)
-        {
-            FlagZ = (registers[A] |= registers[register]) == 0;
-            FlagN = FlagC = FlagH = false;
-            ConsumeCycle(4);
-        }
-
-        private void OR_rm(UInt16 registerMemory)
-        {
-            FlagZ = (registers[A] |= memoryController.GetPosition(registerMemory)) == 0;
-            FlagN = FlagC = FlagH = false;
-            ConsumeCycle(8);
-        }
-
-        private void OR_n()
-        {
-            FlagZ = (registers[A] |= memoryController.GetPosition(PC++)) == 0;
-            FlagN = FlagC = FlagH = false;
-            ConsumeCycle(8);
-        }
-        #endregion
-
-        #region XOR
-        private void XOR_r(int register)
-        {
-            FlagN = FlagH = FlagC = false;
-            FlagZ = (registers[A] ^= registers[register]) == 0;
-            ConsumeCycle(4);
-        }
-
-        private void XOR_rm(UInt16 registerMemory)
-        {
-            FlagN = FlagH = FlagC = false;
-            FlagZ = (registers[A] ^= memoryController.GetPosition(registerMemory)) == 0;
-            ConsumeCycle(8);
-        }
-
-        private void XOR_n()
-        {
-            FlagN = FlagH = FlagC = false;
-            FlagZ = (registers[A] ^= memoryController.GetPosition(PC++)) == 0;
-            ConsumeCycle(8);
-        }
-        #endregion
-
-        #region CP
-
-        private void CP_r(int register)
-        {
-            UInt16 operation = (UInt16)(registers[A] - registers[register]);
-            FlagZ = operation == 0;
-            FlagN = true;
-            FlagH = (registers[A] & 0x0F) - (registers[register] & 0x0F) > 0x0F;
-            FlagC = operation < 0 ? true : false;
-            ConsumeCycle(4);
-        }
-
-        private void CP_rm(UInt16 registerMemory)
-        {
-            var x = memoryController.GetPosition(registerMemory);
-            UInt16 operation = (UInt16)(registers[A] - x);
-            FlagZ = operation == 0;
-            FlagN = true;
-            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
-            FlagC = operation < 0 ? true : false;
-            ConsumeCycle(8);
-        }
-
-        private void CP_n()
-        {
-            var x = memoryController.GetPosition(PC++);
-            UInt16 operation = (UInt16)(registers[A] - x);
-            FlagZ = operation == 0;
-            FlagN = true;
-            FlagH = (registers[A] & 0x0F) - (x & 0x0F) > 0x0F;
-            FlagC = operation < 0 ? true : false;
-            ConsumeCycle(8);
-        }
-        #endregion
-
-        #endregion
-
-
-
-
-
-
-
-
- 
-
+        /// <summary>
+        /// An instruction is not implemented.
+        /// </summary>
+        /// <param name="instruction">The instruction number.</param>
+        /// <exception cref="System.NotImplementedException">Instruction  + instruction +  hasn't been implemented yet!</exception>
         private void NotImplemented(int instruction)
         {
             throw new NotImplementedException("Instruction " + instruction + " hasn't been implemented yet!");

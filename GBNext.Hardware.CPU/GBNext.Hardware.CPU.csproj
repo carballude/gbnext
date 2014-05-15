@@ -39,12 +39,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CPU.8Bits.Loads.cs" />
     <Compile Include="CPU.Calls.cs" />
     <Compile Include="CPU.cs" />
     <Compile Include="CPU.Jumps.cs" />
     <Compile Include="CPU.Miscellaneus.cs" />
     <Compile Include="CPU.Restarts.cs" />
     <Compile Include="CPU.Returns.cs" />
+    <Compile Include="CPU.Rotates.cs" />
+    <Compile Include="CPU.Shifts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +58,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CPU.Bit.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CPU.16bits.Loads.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CPU.8Bits.ALU.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CPU.16Bit.ALU.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
