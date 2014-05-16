@@ -46,7 +46,7 @@ namespace GBNext.Disassembler
         {
             var counter = 0;
             for (int i = 0; i < 256; i++)
-                if(Mnemonics.Mnemonic((byte)i).CompareTo("UNKNOWN")==0)
+                if(Mnemonics.Mnemonic((byte)i).Text.CompareTo("UNKNOWN")==0)
                     counter++;
             Console.WriteLine("So far {0} out of 256 instructions have been implemented. Only {1} to go!", 256 - counter, counter);
         }
@@ -58,7 +58,20 @@ namespace GBNext.Disassembler
             var sb = new StringBuilder();
             for (int i = Int32.Parse(command[1], System.Globalization.NumberStyles.HexNumber); i <= Int32.Parse(command[2], System.Globalization.NumberStyles.HexNumber); i++)
             {
-                sb.Append(string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i])));
+                var instruction = string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i]).Text);
+                if (Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes == 1)
+                {
+                    instruction = instruction.Replace("n", string.Format("0x{0:X2}",cartridge[++i]));
+                }
+                if (Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes == 2)
+                {
+                    var first = cartridge[++i];
+                    var second = cartridge[++i];
+                    instruction = instruction.Replace("nn", string.Format("0x{0:X2}{1:X2}", second, first));
+                }
+                sb.Append(instruction);
+                //sb.Append(string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i]).Text));
+                //i += Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes;
             }
             Console.WriteLine(sb.ToString());
         }
@@ -69,7 +82,8 @@ namespace GBNext.Disassembler
             var sb = new StringBuilder();
             for (int i = 0x100; i < 0x103; i++)
             {
-                sb.Append(string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i])));
+                sb.Append(string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i]).Text));
+                i += Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes;
             }
             Console.WriteLine(sb.ToString());
         }        
