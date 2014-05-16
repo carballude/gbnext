@@ -12,24 +12,28 @@ namespace GBNext.Hardware.CPU
         {
             _SP -= 2;
             memoryController.Write16(_SP, AF);
+            ConsumeCycle(16);
         }
 
         private void PUSH_BC()
         {
             _SP -= 2;
             memoryController.Write16(_SP, BC);
+            ConsumeCycle(16);
         }
 
         private void PUSH_DE()
         {
             _SP -= 2;
             memoryController.Write16(_SP, DE);
+            ConsumeCycle(16);
         }
 
         private void PUSH_HL()
         {
             _SP -= 2;
             memoryController.Write16(_SP, HL);
+            ConsumeCycle(16);
         }
 
         private void POP_BC()
