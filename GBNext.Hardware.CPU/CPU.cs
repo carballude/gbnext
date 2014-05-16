@@ -30,7 +30,7 @@ namespace GBNext.Hardware.CPU
         {
             get
             {
-                return --_SP;
+                return --_SP; //¿PORQUEEEEEEEEEEEEEE?
             }
             set
             {
@@ -315,11 +315,11 @@ namespace GBNext.Hardware.CPU
                     case 0xBE: CP_rm(HL); break;
                     case 0xBF: CP_r(A); break;
                     case 0xC0: RET_cc(JumpCondition.NZ); break;
-                    case 193: NotImplemented(193); break;
+                    case 0xC1: POP_BC(); break;
                     case 0xC2: JP_cc_nn(JumpCondition.NZ); break;
                     case 0xC3: JP_nn(); break;
                     case 0xC4: CALL_cc_nn(JumpCondition.NZ); break;
-                    case 197: NotImplemented(197); break;
+                    case 0xC5: PUSH_BC(); break;
                     case 0xC6: ADD_n(); break;
                     case 0xC7: RST_n(0x00); break;
                     case 0xC8: RET_cc(JumpCondition.Z); break;
@@ -331,11 +331,11 @@ namespace GBNext.Hardware.CPU
                     case 0xCE: ADC_n(); break;
                     case 0xCF: RST_n(0x08); ; break;
                     case 0xD0: RET_cc(JumpCondition.NC); break;
-                    case 209: NotImplemented(209); break;
+                    case 0xD1: POP_DE(); break;
                     case 0xD2: JP_cc_nn(JumpCondition.NC); break;
                     case 211: NotImplemented(211); break;
                     case 0xD4: CALL_cc_nn(JumpCondition.NC); break;
-                    case 213: NotImplemented(213); break;
+                    case 0xD5: PUSH_DE(); ; break;
                     case 0xD6: SUB_nn(); break;
                     case 0xD7: RST_n(0x10); break;
                     case 0xD8: RET_cc(JumpCondition.C); break;
@@ -347,11 +347,11 @@ namespace GBNext.Hardware.CPU
                     case 222: NotImplemented(222); break;
                     case 0xDF: RST_n(0x18); break;
                     case 0xE0: LD_ffnn_r(A); break;
-                    case 225: NotImplemented(225); break;
+                    case 0xE1: POP_HL(); break;
                     case 0xE2: LD_ffrm_r(C, A); break;
                     case 227: NotImplemented(227); break;
                     case 228: NotImplemented(228); break;
-                    case 229: NotImplemented(229); break;
+                    case 0xE5: PUSH_HL(); break;
                     case 0xE6: AND_n(); break;
                     case 0xE7: RST_n(0x20); break;
                     case 0xE8: ADD_SP(); break;
@@ -363,11 +363,11 @@ namespace GBNext.Hardware.CPU
                     case 0xEE: XOR_n(); break;
                     case 0xEF: RST_n(0x28); break;
                     case 0xF0: LD_r_ffnn(A); break;
-                    case 241: NotImplemented(241); break;
+                    case 0xF1: POP_AF(); break;
                     case 0xF2: LD_r_ffrm(A, C); break;
                     case 0xF3: DI(); break;
                     case 244: NotImplemented(244); break;
-                    case 245: NotImplemented(245); break;
+                    case 0xF5: PUSH_AF(); break;
                     case 0xF6: OR_n(); break;
                     case 0xF7: RST_n(0x30); break;
                     case 0xF8: LDHL_SP_n(); break;
@@ -479,7 +479,6 @@ namespace GBNext.Hardware.CPU
                 }
             }
         }
-
 
         /// <summary>
         /// Consumes CPU cycles.
