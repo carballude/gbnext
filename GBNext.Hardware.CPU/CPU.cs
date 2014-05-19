@@ -123,7 +123,15 @@ namespace GBNext.Hardware.CPU
         public override string ToString()
         {
             var ret = "PC: " + string.Format("0x{0:X2}", PC) + "\n";
-            ret += "SP: " + string.Format("0x{0:X2}", _SP);
+            ret += "SP: " + string.Format("0x{0:X2}", _SP)+"\n";
+            ret += "A: " + string.Format("0x{0:X2}", A) + "\n";
+            ret += "B: " + string.Format("0x{0:X2}", B) + "\n";
+            ret += "C: " + string.Format("0x{0:X2}", C) + "\n";
+            ret += "D: " + string.Format("0x{0:X2}", D) + "\n";
+            ret += "E: " + string.Format("0x{0:X2}", E) + "\n";
+            ret += "F: " + string.Format("0x{0:X2}", F) + "\n";
+            ret += "H: " + string.Format("0x{0:X2}", H) + "\n";
+            ret += "L: " + string.Format("0x{0:X2}", L);
             return ret;
         }
 
