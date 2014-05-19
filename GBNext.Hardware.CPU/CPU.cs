@@ -1,6 +1,8 @@
-﻿using GBNext.Hardware.Memory;
+﻿using GBNext.Disassembler;
+using GBNext.Hardware.Memory;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -101,6 +103,12 @@ namespace GBNext.Hardware.CPU
         }
         #endregion
 
+        public CPU(IMemoryController memoryController)
+        {
+            this.memoryController = memoryController;
+            Init();
+        }
+
         private enum JumpCondition { NZ, Z, NC, C };
 
         /// <summary>
@@ -110,6 +118,48 @@ namespace GBNext.Hardware.CPU
         {
             PC = 0x100; // 256
             SP = 0xFFFE; // 65534
+        }
+
+        public override string ToString()
+        {
+            var ret = "PC: " + string.Format("0x{0:X2}", PC) + "\n";
+            ret += "SP: " + string.Format("0x{0:X2}", _SP);
+            return ret;
+        }
+
+        public void ExecuteNextInstruction()
+        {
+            var opcode = memoryController.GetPosition(PC++);
+            var instruction = Mnemonics.Mnemonic(opcode);
+            var instructionText = instruction.Text;
+            if (instruction.ExtraOpcodes == 1)
+                instructionText = instructionText.Replace("n", string.Format("0x{0:X2}", memoryController.GetPosition((ushort)(PC))));
+            else if(instruction.ExtraOpcodes == 2)
+            {
+                var first = memoryController.GetPosition((ushort)(PC));
+                var second = memoryController.GetPosition((ushort)(PC + 1));
+                instructionText = instructionText.Replace("nn", string.Format("0x{0:X2}{1:X2}", second, first));
+            }
+            Console.WriteLine("Executing: {0}", instructionText);
+            ExecuteInstruction(opcode);
+            ShowNextInstruction();
+            Console.WriteLine(this);
+        }
+
+        public void ShowNextInstruction()
+        {
+            var opcode = memoryController.GetPosition(PC);
+            var instruction = Mnemonics.Mnemonic(opcode);
+            var instructionText = instruction.Text;
+            if (instruction.ExtraOpcodes == 1)
+                instructionText = instructionText.Replace("n", string.Format("0x{0:X2}", memoryController.GetPosition((ushort)(PC+1))));
+            else if (instruction.ExtraOpcodes == 2)
+            {
+                var first = memoryController.GetPosition((ushort)(PC+1));
+                var second = memoryController.GetPosition((ushort)(PC + 2));
+                instructionText = instructionText.Replace("nn", string.Format("0x{0:X2}{1:X2}", second, first));
+            }
+            Console.WriteLine("Next instruction: {0}", instructionText);
         }
 
         /// <summary>
@@ -487,7 +537,7 @@ namespace GBNext.Hardware.CPU
         /// <exception cref="System.NotImplementedException"></exception>
         private void ConsumeCycle(int cycles)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine("We should be consuming " + cycles + " cycles");
         }
 
 

@@ -51,6 +51,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GBNext.Disassembler\GBNext.Disassembler.csproj">
+      <Project>{e07d86ce-9a1c-4c47-b957-2a02b4d93180}</Project>
+      <Name>GBNext.Disassembler</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GBNext.Hardware.Memory\GBNext.Hardware.Memory.csproj">
       <Project>{aaea9589-d2ae-4f80-acef-2a2c65e71ec8}</Project>
       <Name>GBNext.Hardware.Memory</Name>

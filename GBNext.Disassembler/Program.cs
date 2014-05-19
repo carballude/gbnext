@@ -70,8 +70,6 @@ namespace GBNext.Disassembler
                     instruction = instruction.Replace("nn", string.Format("0x{0:X2}{1:X2}", second, first));
                 }
                 sb.Append(instruction);
-                //sb.Append(string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i]).Text));
-                //i += Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes;
             }
             Console.WriteLine(sb.ToString());
         }
@@ -82,8 +80,18 @@ namespace GBNext.Disassembler
             var sb = new StringBuilder();
             for (int i = 0x100; i < 0x103; i++)
             {
-                sb.Append(string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i]).Text));
-                i += Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes;
+                var instruction = string.Format("{0:X2} 0x{1:X2} {2}\n", i, cartridge[i], Mnemonics.Mnemonic(cartridge[i]).Text);
+                if (Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes == 1)
+                {
+                    instruction = instruction.Replace("n", string.Format("0x{0:X2}", cartridge[++i]));
+                }
+                if (Mnemonics.Mnemonic(cartridge[i]).ExtraOpcodes == 2)
+                {
+                    var first = cartridge[++i];
+                    var second = cartridge[++i];
+                    instruction = instruction.Replace("nn", string.Format("0x{0:X2}{1:X2}", second, first));
+                }
+                sb.Append(instruction);
             }
             Console.WriteLine(sb.ToString());
         }        

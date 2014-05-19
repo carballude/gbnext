@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AAEA9589-D2AE-4F80-ACEF-2A2C65E71EC8}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{CA6C90FF-1075-4FE2-8807-FA047F920916}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GBNext.Hardware.Memory</RootNamespace>
-    <AssemblyName>GBNext.Hardware.Memory</AssemblyName>
+    <RootNamespace>GBNext.CommandLine</RootNamespace>
+    <AssemblyName>GBNext.CommandLine</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -39,14 +41,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMemoryController.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RomOnly.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GBNext.Hardware.Cartridge\GBNext.Hardware.Cartridge.csproj">
       <Project>{2234fffb-3b04-4eb2-8bb4-2c8e03948190}</Project>
       <Name>GBNext.Hardware.Cartridge</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GBNext.Hardware.CPU\GBNext.Hardware.CPU.csproj">
+      <Project>{81a18f18-6973-4436-87ea-4dc1f6e59160}</Project>
+      <Name>GBNext.Hardware.CPU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GBNext.Hardware.Memory\GBNext.Hardware.Memory.csproj">
+      <Project>{aaea9589-d2ae-4f80-acef-2a2c65e71ec8}</Project>
+      <Name>GBNext.Hardware.Memory</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

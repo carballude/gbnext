@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GBNext.Disassembler
 {
-    class Mnemonics
+    public class Mnemonics
     {
         public static Mnemonic Mnemonic(byte opcode)
         {
