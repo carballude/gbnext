@@ -8,17 +8,42 @@ namespace GBNext.Hardware.CPU
 {
     public partial class CPU
     {
-        private void LD_rr_nn(UInt16 registry)
+
+        private void LD_HL_nn()
         {
             var lo = memoryController.GetPosition(PC++);
             var hi = memoryController.GetPosition(PC++);
-            registry = (ushort)((hi << 8) | lo);
+            SetHL((ushort)((hi << 8) | lo));
             ConsumeCycle(12);
         }
 
-        private void LD_rr_rr(UInt16 to, UInt16 from)
+        private void LD_BC_nn()
         {
-            to = from;
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            SetBC((ushort)((hi << 8) | lo));
+            ConsumeCycle(12);
+        }
+
+        private void LD_DE_nn()
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            SetDE((ushort)((hi << 8) | lo));
+            ConsumeCycle(12);
+        }
+
+        private void LD_SP_nn()
+        {
+            var lo = memoryController.GetPosition(PC++);
+            var hi = memoryController.GetPosition(PC++);
+            SP = ((ushort)((hi << 8) | lo));
+            ConsumeCycle(12);
+        }
+
+        private void LD_SP_HL(UInt16 to, UInt16 from)
+        {
+            SP = HL;
             ConsumeCycle(8);
         }
 

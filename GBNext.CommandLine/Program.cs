@@ -22,13 +22,20 @@ namespace GBNext.CommandLine
         {
             Console.Write("> ");
             var response = Console.ReadLine().ToLowerInvariant();
-            switch (response.Split(new char[]{' '}).First())
+            switch (response.Split(new char[] { ' ' }).First())
             {
                 case "exit":
                     Environment.Exit(0);
                     break;
                 case "load":
-                    Load(response);
+                    try
+                    {
+                        Load(response);
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        Console.Error.WriteLine(e.Message);
+                    }
                     break;
                 case "next":
                     Next();
@@ -45,7 +52,14 @@ namespace GBNext.CommandLine
 
         private void ShowNextInstruction()
         {
-            Cpu.ShowNextInstruction();
+            if (Cpu == null)
+            {
+                Console.WriteLine("No cartridge has been loaded yet!");
+            }
+            else
+            {
+                Cpu.ShowNextInstruction();
+            }
         }
 
         private void ShowCpuStatus()
@@ -66,12 +80,19 @@ namespace GBNext.CommandLine
             var chunks = response.Split(new char[] { ' ' });
             if (chunks.Length != 2) throw new ArgumentException("Load only takes the path to the file");
             if (!File.Exists(chunks.Last())) throw new FileNotFoundException("File " + chunks.Last() + " doesn't seem to exist!");
-            Cartridge = new Hardware.Cartridge.Cartridge(chunks.Last());
-            Console.WriteLine("Cartridge has configuration: " + Cartridge.Configuration);
-            Console.WriteLine("Rom size: " + Cartridge.RomSize + "kb");
-            Console.WriteLine("Cartridge has been loaded :)");
-            Cpu = new CPU(CreateMemory());
-            Console.WriteLine("CPU has been created with appropriate memory model :)");
+            try
+            {
+                Cartridge = new Hardware.Cartridge.Cartridge(chunks.Last());
+                Console.WriteLine("Cartridge has configuration: " + Cartridge.Configuration);
+                Console.WriteLine("Rom size: " + Cartridge.RomSize + "kb");
+                Console.WriteLine("Cartridge has been loaded :)");
+                Cpu = new CPU(CreateMemory());
+                Console.WriteLine("CPU has been created with appropriate memory model :)");
+            }
+            catch (ArgumentException e)
+            {
+                Console.Error.WriteLine(e.Message);
+            }
         }
 
         private IMemoryController CreateMemory()
@@ -81,7 +102,7 @@ namespace GBNext.CommandLine
             throw new ArgumentException("Not supported cartridge configuration");
         }
 
-       
+
 
         static void Main(string[] args)
         {

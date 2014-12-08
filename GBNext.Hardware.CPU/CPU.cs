@@ -58,6 +58,11 @@ namespace GBNext.Hardware.CPU
             }
         }
 
+        private void SetBC(UInt16 value)
+        {
+            BC = value;
+        }
+
         UInt16 BC
         {
             get
@@ -73,6 +78,11 @@ namespace GBNext.Hardware.CPU
             }
         }
 
+        private void SetDE(UInt16 value)
+        {
+            DE = value;
+        }
+
         UInt16 DE
         {
             get
@@ -86,6 +96,11 @@ namespace GBNext.Hardware.CPU
                 registers[D] = (byte)value;
                 registers[E] = (byte)(value >> 8);
             }
+        }
+
+        private void SetHL(UInt16 value)
+        {
+            HL = value;
         }
 
         UInt16 HL
@@ -124,14 +139,14 @@ namespace GBNext.Hardware.CPU
         {
             var ret = "PC: " + string.Format("0x{0:X2}", PC) + "\n";
             ret += "SP: " + string.Format("0x{0:X2}", _SP)+"\n";
-            ret += "A: " + string.Format("0x{0:X2}", A) + "\n";
-            ret += "B: " + string.Format("0x{0:X2}", B) + "\n";
-            ret += "C: " + string.Format("0x{0:X2}", C) + "\n";
-            ret += "D: " + string.Format("0x{0:X2}", D) + "\n";
-            ret += "E: " + string.Format("0x{0:X2}", E) + "\n";
-            ret += "F: " + string.Format("0x{0:X2}", F) + "\n";
-            ret += "H: " + string.Format("0x{0:X2}", H) + "\n";
-            ret += "L: " + string.Format("0x{0:X2}", L);
+            ret += "A: " + string.Format("0x{0:X2}", registers[A]) + "\n";
+            ret += "B: " + string.Format("0x{0:X2}", registers[B]) + "\n";
+            ret += "C: " + string.Format("0x{0:X2}", registers[C]) + "\n";
+            ret += "D: " + string.Format("0x{0:X2}", registers[D]) + "\n";
+            ret += "E: " + string.Format("0x{0:X2}", registers[E]) + "\n";
+            ret += "F: " + string.Format("0x{0:X2}", registers[F]) + "\n";
+            ret += "H: " + string.Format("0x{0:X2}", registers[H]) + "\n";
+            ret += "L: " + string.Format("0x{0:X2}", registers[L]);
             return ret;
         }
 
@@ -181,7 +196,7 @@ namespace GBNext.Hardware.CPU
                 switch (currentInstruction)
                 {
                     case 0x00: NOP(); break;
-                    case 0x01: LD_rr_nn(BC); break;
+                    case 0x01: LD_BC_nn(); break;
                     case 0x02: LD_rm_r(BC, A); break;
                     case 0x03: INC_rr(B,C); break;
                     case 0x04: INC_r(B); break;
@@ -197,7 +212,7 @@ namespace GBNext.Hardware.CPU
                     case 0x0E: LD_r_n(C); break;
                     case 0x0F: RRCA(); break;
                     case 0x10: STOP(); break;
-                    case 0x11: LD_rr_nn(DE); break;
+                    case 0x11: LD_DE_nn(); break;
                     case 0x12: LD_rm_r(DE, A); break;
                     case 0x13: INC_rr(D,E); break;
                     case 0x14: INC_r(D); break;
@@ -213,7 +228,7 @@ namespace GBNext.Hardware.CPU
                     case 0x1E: LD_r_n(E); break;
                     case 0x1F: RRA(); break;
                     case 0x20: JR_cc_n(JumpCondition.NZ); break;
-                    case 0x21: LD_rr_nn(HL); break;
+                    case 0x21: LD_HL_nn(); break;
                     case 0x22: LDI_rm_r(HL, A); break;
                     case 0x23: INC_rr(H, L); break;
                     case 0x24: INC_r(H); break;
@@ -229,7 +244,7 @@ namespace GBNext.Hardware.CPU
                     case 0x2E: LD_r_n(L); break;
                     case 0x2F: CPL(); break;
                     case 0x30: JR_cc_n(JumpCondition.NC); break;
-                    case 0x31: LD_rr_nn(SP); break;
+                    case 0x31: LD_SP_nn(); break;
                     case 0x32: LDD_rm_r(HL, A); break;
                     case 0x33: INC_SP(); break;
                     case 0x34: INC_rm(HL); break;
@@ -429,7 +444,7 @@ namespace GBNext.Hardware.CPU
                     case 0xF6: OR_n(); break;
                     case 0xF7: RST_n(0x30); break;
                     case 0xF8: LDHL_SP_n(); break;
-                    case 0xF9: LD_rr_rr(SP, HL); break;
+                    case 0xF9: LD_SP_HL(SP, HL); break;
                     case 0xFA: LD_r_nn(A); break;
                     case 0xFB: EI(); break;
                     case 252: NotImplemented(252); break;
